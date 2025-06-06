@@ -36,7 +36,7 @@ export class JwtBlacklistService implements OnModuleInit {
         expireAt,
       });
 
-      this.logger.warn(`Blacklisted token: ${token}`);
+      // this.logger.warn(`Blacklisted token: ${token}`);
     } catch (err: any) {
       if (err.code === 11000) {
         this.logger.warn('Token is already blacklisted');
