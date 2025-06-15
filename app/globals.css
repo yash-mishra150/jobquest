@@ -116,7 +116,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply  text-foreground;
     font-family: var(--font-poppins-sans), sans-serif;
   }
 

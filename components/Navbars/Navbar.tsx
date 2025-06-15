@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from 'react';
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -16,6 +18,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { RootState } from '@/redux/store';
 import { logout } from '@/redux/slices/AuthSlice';
+import { usePathname } from 'next/navigation';
 
 
 const Tabs = [
@@ -28,6 +31,11 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+  const pathname = usePathname();
+
+  if (pathname == "/login" || pathname == "/signup") {
+    return null;
+  }
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -39,7 +47,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="p-4 px-4 md:px-10 bg-white shadow-sm w-full">
+    <nav className="p-4 px-4 md:px-10 relative shadow-sm w-full">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
         {/* Logo Section */}
         <div className="flex gap-2 items-center">
@@ -119,7 +127,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden mt-4 flex flex-col gap-2 bg-white p-4 rounded-md shadow-sm">
+        <div className="md:hidden mt-4 flex flex-col gap-2 bg-transparent relative p-4 rounded-md shadow-sm">
           {Tabs.map((item, index) => (
             <Button
               variant="link"
