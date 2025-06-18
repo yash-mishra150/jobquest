@@ -16,7 +16,7 @@ const Stepper = () => {
           <div key={index} className="flex flex-col items-center">
             <div
               className={`flex items-center justify-center w-10 h-10 rounded-full border-2
-                ${isActive ? 'bg-[#49a6b4] text-white border-[#49a6b4]' : 'bg-white text-gray-500 border-gray-300'}
+                ${isActive ? 'bg-[#7367F0] text-white border-[#7367F0]' : 'bg-white text-gray-500 border-gray-300'}
               `}
             >
               {index + 1}

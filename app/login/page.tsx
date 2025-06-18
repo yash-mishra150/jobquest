@@ -63,11 +63,11 @@ const page = ({ }: pageProps) => {
 
         <div className=''>
           <p>Username</p>
-          <Input name='' placeholder='name@company.com' className='w-[80vw] max-w-[450px] border-black focus-visible:ring-[#49a6b4] py-6.5 px-3 rounded-2xl mt-2' />
+          <Input name='' placeholder='name@company.com' className='w-[80vw] max-w-[450px] border-black focus-visible:ring-[#7367F0] py-6.5 px-3 rounded-2xl mt-2' />
           <p className='mt-2'>Password</p>
-          <Input name='' placeholder='ExPass@123' className='w-[80vw] max-w-[450px] border-black focus-visible:ring-[#49a6b4] py-6.5 px-3 rounded-2xl mt-2' />
+          <Input name='' placeholder='ExPass@123' className='w-[80vw] max-w-[450px] border-black focus-visible:ring-[#7367F0] py-6.5 px-3 rounded-2xl mt-2' />
         </div>
-        <Button className='w-[80vw] bg-[#49a6b4] max-w-[450px] py-7 px-3 disabled:bg-neutral-200 disabled:text-black rounded-2xl mt-2 text-lg' 
+        <Button className='w-[80vw] bg-[#7367F0] max-w-[450px] py-7 px-3 disabled:bg-neutral-200 disabled:text-black rounded-2xl mt-2 text-lg' 
         // disabled
         >Continue</Button>
       </div>

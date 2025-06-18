@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, ChevronDown } from 'lucide-react';
@@ -30,7 +30,7 @@ const HeroSection: React.FC = () => {
   };
 
   const imageVariants = {
-    hidden: { scale: 0.8, opacity: 0 },
+    hidden: { scale: 0.95, opacity: 0 },
     visible: { scale: 1, opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
   };
 
@@ -43,7 +43,7 @@ const HeroSection: React.FC = () => {
 
   return (
     <motion.div
-      className="relative min-h-[80vh] px-4 sm:px-8 lg:px-20 py-16 bg-gradient-to-br from-[#49a6b4]/10 to-[#49a6b4]/30 text-gray-900 flex items-center justify-center overflow-hidden"
+      className="relative min-h-[80vh] px-4 sm:px-8 lg:px-20 py-16 bg-gradient-to-br from-[#CE9FFC]/10 to-[#CE9FFC]/30 text-gray-900 flex items-center justify-center overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -108,7 +108,7 @@ const HeroSection: React.FC = () => {
           </div>
           <Button
             onClick={handleSearch}
-            className="w-full sm:w-auto bg-[#49a6b4] hover:bg-[#3b8a96] text-white font-semibold px-6 py-2 rounded-lg"
+            className="w-full sm:w-auto bg-[#7367F0] hover:bg-[#A582F7] text-white font-semibold px-6 py-2 rounded-lg"
             disabled={!searchQuery || !location}
           >
             Find Jobs
@@ -118,13 +118,13 @@ const HeroSection: React.FC = () => {
         {/* Stats or CTA */}
         <motion.div className="flex gap-4 sm:gap-8 text-sm sm:text-base" variants={itemVariants}>
           <div>
-            <span className="font-semibold text-[#49a6b4]">500k+</span> Jobs Posted
+            <span className="font-semibold text-[#7367F0]">500k+</span> Jobs Posted
           </div>
           <div>
-            <span className="font-semibold text-[#49a6b4]">1M+</span> Professionals
+            <span className="font-semibold text-[#7367F0]">1M+</span> Professionals
           </div>
           <div>
-            <span className="font-semibold text-[#49a6b4]">10k+</span> Companies
+            <span className="font-semibold text-[#7367F0]">10k+</span> Companies
           </div>
         </motion.div>
       </div>

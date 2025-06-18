@@ -60,7 +60,7 @@ const Footer = ({ }: FooterProps) => {
 
                     <div className="flex flex-col gap-4 sm:flex-row lg:justify-end">
                         <Button
-                            className="flex h-12 w-48 items-center justify-center gap-2 bg-[#49a6b4] text-white transition-colors duration-300"
+                            className="flex h-12 w-48 items-center justify-center gap-2 bg-[#7367F0] text-white transition-colors duration-300"
                             aria-label="Download from Play Store"
                         >
                             <Image
@@ -73,7 +73,7 @@ const Footer = ({ }: FooterProps) => {
                             Play Store
                         </Button>
                         <Button
-                            className="flex h-12 w-48 items-center justify-center gap-2 bg-[#49a6b4] text-white transition-colors duration-300"
+                            className="flex h-12 w-48 items-center justify-center gap-2 bg-[#7367F0] text-white transition-colors duration-300"
                             aria-label="Download from App Store"
                         >
                             <Image
@@ -193,7 +193,7 @@ const Footer = ({ }: FooterProps) => {
                                 </div>
                                 <Button
                                     type="submit"
-                                    className="rounded-md bg-[#49a6b4] w-48  h-12 text-white font-semibold transition-colors duration-200 hover:bg-jobquest-blue-dark sm:py-2"
+                                    className="rounded-md bg-[#7367F0] w-48  h-12 text-white font-semibold transition-colors duration-200 hover:bg-jobquest-blue-dark sm:py-2"
                                 >
                                     Subscribe
                                 </Button>

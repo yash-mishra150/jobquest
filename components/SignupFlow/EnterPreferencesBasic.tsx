@@ -61,7 +61,7 @@ const EnterPreferencesBasic = () => {
                         <Input
                             {...register('phone')}
                             placeholder="9876543210"
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -71,7 +71,7 @@ const EnterPreferencesBasic = () => {
                         <Select
                             onValueChange={(value) => setValue('userType', value)}
                         >
-                            <SelectTrigger className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl">
+                            <SelectTrigger className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl">
                                 <SelectValue placeholder="Select User Type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -88,7 +88,7 @@ const EnterPreferencesBasic = () => {
                         <Select
                             onValueChange={(value) => setValue('preferredJobType', value)}
                         >
-                            <SelectTrigger className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl">
+                            <SelectTrigger className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl">
                                 <SelectValue placeholder="Select Job Type" />
                             </SelectTrigger>
                             <SelectContent>
@@ -105,7 +105,7 @@ const EnterPreferencesBasic = () => {
                         <Select
                             onValueChange={(value) => setValue('preferredWorkMode', value)}
                         >
-                            <SelectTrigger className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl">
+                            <SelectTrigger className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl">
                                 <SelectValue placeholder="Select Work Mode" />
                             </SelectTrigger>
                             <SelectContent>
@@ -119,7 +119,7 @@ const EnterPreferencesBasic = () => {
 
                 <Button
                     type="submit"
-                    className="w-full bg-[#49a6b4] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
+                    className="w-full bg-[#7367F0] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
                 >
                     Continue
                 </Button>

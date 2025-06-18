@@ -48,7 +48,7 @@ const EnterDetailsName = ({}: EnterDetailsNameProps) => {
                             placeholder="name@company.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -59,7 +59,7 @@ const EnterDetailsName = ({}: EnterDetailsNameProps) => {
                             placeholder="John Doe"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -71,7 +71,7 @@ const EnterDetailsName = ({}: EnterDetailsNameProps) => {
                             placeholder="Enter your password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -83,7 +83,7 @@ const EnterDetailsName = ({}: EnterDetailsNameProps) => {
                             placeholder="Confirm your password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
                 </div>
@@ -93,18 +93,18 @@ const EnterDetailsName = ({}: EnterDetailsNameProps) => {
                     disabled={
                         !email || !name || !password || password !== confirmPassword
                     }
-                    className="w-full bg-[#49a6b4] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
+                    className="w-full bg-[#7367F0] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
                 >
                     Continue
                 </Button>
 
                 <p className="text-sm text-center text-gray-600 mt-6 mb-10 px-2 leading-relaxed">
                     By signing up, you acknowledge that you have read and agree to our{' '}
-                    <a href="/terms" className="text-[#49a6b4] underline">
+                    <a href="/terms" className="text-[#7367F0] underline">
                         Terms of Service
                     </a>{' '}
                     and{' '}
-                    <a href="/privacy" className="text-[#49a6b4] underline">
+                    <a href="/privacy" className="text-[#7367F0] underline">
                         Privacy Policy
                     </a>.
                 </p>

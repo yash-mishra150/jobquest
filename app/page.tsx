@@ -12,7 +12,7 @@ const Home = ({ }: pageProps) => {
   return (
     <div>
       {/* <InitialLoading /> */}
-      <HeroSection/>
+      <HeroSection />
       {/* <Footer/> */}
     </div>
   );

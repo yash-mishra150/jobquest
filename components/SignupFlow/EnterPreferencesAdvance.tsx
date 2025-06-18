@@ -75,7 +75,7 @@ const EnterPreferencesAdvanced = () => {
                         <Input
                             {...register('locationPreferences')}
                             placeholder="Bangalore, Remote"
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -85,7 +85,7 @@ const EnterPreferencesAdvanced = () => {
                         <Input
                             {...register('skills')}
                             placeholder="JavaScript, React, MongoDB"
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl"
                         />
                     </div>
 
@@ -95,7 +95,7 @@ const EnterPreferencesAdvanced = () => {
                         <Select
                             onValueChange={(value) => setValue('expectedSalaryRange', value)}
                         >
-                            <SelectTrigger className="w-full border-black focus-visible:ring-[#49a6b4] py-5 px-3 rounded-2xl">
+                            <SelectTrigger className="w-full border-black focus-visible:ring-[#7367F0] py-5 px-3 rounded-2xl">
                                 <SelectValue placeholder="Select Salary Range" />
                             </SelectTrigger>
                             <SelectContent>
@@ -115,7 +115,7 @@ const EnterPreferencesAdvanced = () => {
                         <Input
                             type="file"
                             {...register('resume')}
-                            className="w-full border-black focus-visible:ring-[#49a6b4] py-3 px-3 rounded-2xl"
+                            className="w-full border-black focus-visible:ring-[#7367F0] py-3 px-3 rounded-2xl"
                         />
                     </div>
                     */}
@@ -123,7 +123,7 @@ const EnterPreferencesAdvanced = () => {
 
                 <Button
                     type="submit"
-                    className="w-full bg-[#49a6b4] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
+                    className="w-full bg-[#7367F0] py-7 px-3 mt-8 disabled:bg-neutral-200 disabled:text-black rounded-2xl text-lg"
                 >
                     Continue
                 </Button>

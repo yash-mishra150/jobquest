@@ -50,8 +50,8 @@ const EmailVerify = ({}: EmailVerifyProps) => {
                                     text-center
                                     rounded-lg
                                     border-2 border-gray-300
-                                    focus:border-[#49a6b4]
-                                    focus-visible:ring-2 focus-visible:ring-[#49a6b4]
+                                    focus:border-[#7367F0]
+                                    focus-visible:ring-2 focus-visible:ring-[#7367F0]
                                     transition-all duration-200
                                     shadow
                                 "
@@ -68,8 +68,8 @@ const EmailVerify = ({}: EmailVerifyProps) => {
                                     text-center
                                     rounded-lg
                                     border-2 border-gray-300
-                                    focus:border-[#49a6b4]
-                                    focus-visible:ring-2 focus-visible:ring-[#49a6b4]
+                                    focus:border-[#7367F0]
+                                    focus-visible:ring-2 focus-visible:ring-[#7367F0]
                                     transition-all duration-200
                                     shadow
                                 "
@@ -80,14 +80,14 @@ const EmailVerify = ({}: EmailVerifyProps) => {
 
                     <Button
                         variant="link"
-                        className="text-sm text-[#49a6b4] -mt-2 self-end"
+                        className="text-sm text-[#7367F0] -mt-2 self-end"
                     >
                         Resend OTP
                     </Button>
 
                     <Button
                         onClick={handleContinue}
-                        className="w-[80vw] bg-[#49a6b4] max-w-[450px] py-6 sm:py-7 px-3 disabled:bg-neutral-200 disabled:text-black rounded-2xl mt-2 text-base sm:text-lg"
+                        className="w-[80vw] bg-[#7367F0] max-w-[450px] py-6 sm:py-7 px-3 disabled:bg-neutral-200 disabled:text-black rounded-2xl mt-2 text-base sm:text-lg"
                         disabled={otpValue.length < 6}
                     >
                         Continue
