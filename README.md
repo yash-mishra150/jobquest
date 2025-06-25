@@ -52,7 +52,8 @@ jobquestML/
    ```
 4. Download spaCy model:
    ```
-   python -m spacy download en_core_web_sm
+   cd saved_models
+   python install_spacy_model.py
    ```
 5. Place trained models in the `saved_models/` directory
 6. Create `.env` file with configuration variables
