@@ -5,13 +5,12 @@ import os
 from dotenv import load_dotenv
 
 from routes.job_verification import JobVerificationResource
-from routes.user_clustering import UserClusteringResource
-from routes.company_legitimacy import CompanyLegitimacyResource
 from routes.health import HealthCheckResource
 from routes.resume_extraction import ResumeExtractionResource
 
 from utils.logger import logger
 from config import current_config as config
+from utils.text_processing import preprocess_text
 
 load_dotenv()
 
@@ -26,8 +25,6 @@ def create_app():
     api = Api(app)
     api.add_resource(HealthCheckResource, '/health')
     api.add_resource(JobVerificationResource, '/verify-job')
-    api.add_resource(UserClusteringResource, '/recommend')
-    api.add_resource(CompanyLegitimacyResource, '/company-legitimacy')
     api.add_resource(ResumeExtractionResource, '/extract-resume')
     logger.info("API endpoints registered")
     

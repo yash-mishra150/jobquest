@@ -68,3 +68,13 @@ def extract_keywords(text, n=10):
     keywords = [word for word, count in sorted_words[:n]]
     
     return keywords
+
+def preprocess_text(text, stop_words=None):
+    text = text.lower()
+    text = re.sub(r'\d+', '', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'[^\w\s]', '', text)
+    if stop_words:
+        text = [word for word in text.split() if word not in stop_words]
+        return ' '.join(text)
+    return text

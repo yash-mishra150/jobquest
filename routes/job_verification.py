@@ -21,17 +21,15 @@ class JobVerificationResource(Resource):
                 job_details = data.get('job_details', {})
             
             # Verify job using the model
-            result = self.model.verify_job(job_details)
+            result = self.model.prepare_job_for_model(job_details)
             
             response = {
                 "status": "success",
                 "jobTitle": job_details.get('title', 'Unknown'),
                 "companyName": job_details.get('companyName', 'Unknown'),
-                "prediction": result["prediction"],
+                "prediction": "FRAUDULENT" if result['is_fraudulent'] else 'LEGITIMATE',
+                "probability": result["fraud_probability"],
                 "confidence": result["confidence"],
-                "legitimate": result["legitimate"],
-                "riskLevel": result["risk_level"],
-                "suspiciousFlags": result["suspicious_flags"]
             }
             
             return response, 200
