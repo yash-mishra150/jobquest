@@ -11,6 +11,22 @@ from routes.resume_extraction import ResumeExtractionResource
 from utils.logger import logger
 from config import current_config as config
 from utils.text_processing import preprocess_text
+from model_utils import preprocess_text as global_preprocess_text
+
+# Handle spaCy model fallback
+try:
+    import spacy
+    try:
+        model_path = os.path.join(os.path.dirname(__file__), 'saved_models', 'spacy_skills_model')
+        nlp = spacy.load(model_path)
+    except OSError:
+        print("Warning: en_core_web_sm not found. Using blank model as fallback.")
+        nlp = spacy.blank("en")
+except ImportError:
+    print("Warning: spaCy not installed. NLP features may be limited.")
+
+# Make preprocess_text available in the global namespace for pickle loading
+globals()['preprocess_text'] = preprocess_text
 
 load_dotenv()
 

@@ -6,6 +6,8 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from pdfminer.high_level import extract_text as pdfminer_extract_text
+from .skill_extractor import SkillExtractor  # Import the new SkillExtractor
+from .phone_extractor import extract_phone  # Import the specialized phone extractor
 
 try:
     nltk.data.find('tokenizers/punkt')
@@ -48,16 +50,6 @@ def extract_email(text):
     emails = re.findall(email_pattern, text)
     return emails[0] if emails else ""
 
-def extract_phone(text):
-    phone_pattern = r'(\+\d{1,3}[-.\s]?)?(\d{3}[-.\s]?)?\d{3}[-.\s]?\d{4}'
-    phones = re.findall(phone_pattern, text)
-    formatted_phones = []
-    for phone in phones:
-        formatted_phone = ''.join(phone)
-        if formatted_phone:
-            formatted_phones.append(formatted_phone)
-    return formatted_phones[0] if formatted_phones else ""
-
 def extract_education(text):
     education = []
     education_keywords = [
@@ -75,31 +67,41 @@ def extract_education(text):
     return education
 
 def extract_skills(text):
-    nlp = spacy.load("en_core_web_sm")
-    
-    common_skills = [
-        "python", "java", "javascript", "react", "node.js", "html", "css",
-        "sql", "nosql", "mongodb", "mysql", "postgresql", "aws", "azure",
-        "docker", "kubernetes", "git", "machine learning", "data analysis",
-        "excel", "powerpoint", "word", "communication", "leadership",
-        "project management", "agile", "scrum", "c++", "c#", "php", "ruby",
-        "swift", "kotlin", "angular", "vue.js", "django", "flask", "spring",
-        "hibernate", "tensorflow", "pytorch", "pandas", "numpy", "scikit-learn"
-    ]
-    
-    doc = nlp(text.lower())
-    tokens = [token.text for token in doc if not token.is_stop and not token.is_punct]
-    
-    skills = []
-    for token in tokens:
-        if token in common_skills and token not in skills:
-            skills.append(token)
-            
-    for skill in common_skills:
-        if skill in text.lower() and skill not in skills:
-            skills.append(skill)
-            
-    return skills
+    try:
+        # Use the new SkillExtractor class
+        skill_extractor = SkillExtractor()
+        result = skill_extractor.extract_skills(text)
+        
+        # Return all extracted skills
+        return result["all_skills"]
+    except Exception as e:
+        print(f"Error in skill extraction: {str(e)}")
+        # Fallback if something goes wrong
+        common_skills = [
+            "python", "java", "javascript", "react", "node.js", "html", "css",
+            "sql", "nosql", "mongodb", "mysql", "postgresql", "aws", "azure",
+            "docker", "kubernetes", "git", "machine learning", "data analysis"
+        ]
+        return [skill for skill in common_skills if skill in text.lower()]
+
+# Helper function to check similarity between strings
+def similar(a, b):
+    a = a.lower()
+    b = b.lower()
+    # Exact match
+    if a == b:
+        return True
+    # Contained match
+    if a in b or b in a:
+        return True
+    # Acronym match (e.g., "artificial intelligence" and "ai")
+    if len(a) > 1 and a.isalpha():
+        words = b.split()
+        if len(words) > 1:
+            acronym = ''.join(word[0] for word in words if word)
+            if acronym == a:
+                return True
+    return False
 
 def extract_experience(text):
     experience = []
@@ -138,13 +140,19 @@ def extract_resume_data(pdf_path):
     
     if not text:
         return {"error": "Could not extract text from PDF"}
+    
+    # Extract skills with categories
+    skill_extractor = SkillExtractor()
+    skills_data = skill_extractor.extract_skills(text)
         
     data = {
         "name": extract_name(text),
         "email": extract_email(text),
         "phone": extract_phone(text),
         "education": extract_education(text),
-        "skills": extract_skills(text),
+        "skills": skills_data["all_skills"],
+        "skills_by_category": skills_data["categorized_skills"],
+        "skills_array": skills_data["all_skills"],  # Adding skills in array format
         "experience": extract_experience(text)
     }
     
