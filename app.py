@@ -41,11 +41,32 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": config.CORS_ORIGINS}})
     logger.info(f"CORS configured with allowed origins: {config.CORS_ORIGINS}")
     
-    api = Api(app)
+    api = Api(app)    
     api.add_resource(HealthCheckResource, '/')
     api.add_resource(JobVerificationResource, '/verify-job')
     api.add_resource(ResumeExtractionResource, '/extract-resume')
     logger.info("API endpoints registered")
+    
+    # Add a diagnostic endpoint for deployment troubleshooting
+    @app.route('/check-paths')
+    def check_paths():
+        from utils.path_checker import check_model_paths
+        import io
+        import sys
+        
+        # Capture the output from check_model_paths
+        old_stdout = sys.stdout
+        new_stdout = io.StringIO()
+        sys.stdout = new_stdout
+        
+        try:
+            check_model_paths()
+            output = new_stdout.getvalue()
+        finally:
+            sys.stdout = old_stdout
+        
+        # Return the diagnostic information as a response
+        return f"<pre>{output}</pre>"
     
     return app
 

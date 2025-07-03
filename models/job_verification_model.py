@@ -11,16 +11,45 @@ class JobVerificationModel:
         text = re.sub(r'[^\w\s]', '', text)
         text = [word for word in text.split() if word not in stop_words]
         return ' '.join(text)
-
+        
     @staticmethod
     def predict_job_fraud(data):
-        with open('saved_models\\job_verification-model\\job_fraud_detector.pkl', 'rb') as f:
-            model_package = pickle.load(f)
+        # Use os.path.join for platform-independent file paths
+        import os
+        model_path = os.path.join('saved_models', 'job_verification-model', 'job_fraud_detector.pkl')
+        
+        try:
+            with open(model_path, 'rb') as f:
+                model_package = pickle.load(f)
 
-        model = model_package['model']
-        tfidf = model_package['tfidf_vectorizer']
-        stop_words = model_package['stop_words']
-        text_columns = model_package['text_columns']
+            model = model_package['model']
+            tfidf = model_package['tfidf_vectorizer']
+            stop_words = model_package['stop_words']
+            text_columns = model_package['text_columns']
+        except FileNotFoundError:
+            # Try alternative path formats if the model can't be found
+            alt_paths = [
+                os.path.join(os.path.dirname(__file__), '..', 'saved_models', 'job_verification-model', 'job_fraud_detector.pkl'),
+                'saved_models/job_verification-model/job_fraud_detector.pkl',
+                './saved_models/job_verification-model/job_fraud_detector.pkl'
+            ]
+            
+            for alt_path in alt_paths:
+                try:
+                    print(f"Trying alternative model path: {alt_path}")
+                    with open(alt_path, 'rb') as f:
+                        model_package = pickle.load(f)
+                        
+                    model = model_package['model']
+                    tfidf = model_package['tfidf_vectorizer']
+                    stop_words = model_package['stop_words']
+                    text_columns = model_package['text_columns']
+                    break
+                except FileNotFoundError:
+                    continue
+            else:
+                # If all paths fail, raise an informative error
+                raise FileNotFoundError(f"Could not find model file. Searched paths: {model_path} and alternatives")
         
         title = data.get('title', '')
         company_profile = data.get('company_profile', '')
