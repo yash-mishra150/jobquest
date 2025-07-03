@@ -12,15 +12,11 @@ class JobVerificationResource(Resource):
             
             if not data:
                 return {"error": "No data provided"}, 400
-                  # For compatibility, we can handle both formats:
-            # 1. Job data directly in the request body
-            # 2. Job data in a 'job_details' field
             
             job_details = data
             if 'job_details' in data:
                 job_details = data.get('job_details', {})
-            
-            # Verify job using the model
+
             result = self.model.prepare_job_for_model(job_details)
             
             response = {

@@ -18,19 +18,23 @@ def create_app():
     app = Flask(__name__)
     
     app.config.from_object(config)
+
+    def home():
+        return "Server has Started"
     
     CORS(app, resources={r"/*": {"origins": config.CORS_ORIGINS}})
     logger.info(f"CORS configured with allowed origins: {config.CORS_ORIGINS}")
     
     api = Api(app)
-    api.add_resource(HealthCheckResource, '/health')
+    api.add_resource(HealthCheckResource, '/')
     api.add_resource(JobVerificationResource, '/verify-job')
     api.add_resource(ResumeExtractionResource, '/extract-resume')
     logger.info("API endpoints registered")
     
     return app
 
-if __name__ == '__main__':
-    app = create_app()
+app = create_app()
+
+if __name__ == '__main__':  
     logger.info(f"Starting application on port {config.PORT} with debug={config.DEBUG}")
     app.run(host='0.0.0.0', port=config.PORT, debug=config.DEBUG)
