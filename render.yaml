@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: jobquest-api
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CACHE_TTL_MS
+        value: 300000
+      - key: REQUEST_TIMEOUT_MS
+        value: 30000
+      - key: MAX_CONCURRENT_REQUESTS
+        value: 5
+    healthCheckPath: /app-health

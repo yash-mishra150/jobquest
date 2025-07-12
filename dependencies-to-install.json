@@ -1,0 +1,7 @@
+{
+  "name": "jobquest-microservices",
+  "dependencies": {
+    "@nestjs/microservices": "^10.0.0",
+    "concurrently": "^8.0.0"
+  }
+}
