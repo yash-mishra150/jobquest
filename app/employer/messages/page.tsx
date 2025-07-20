@@ -1,4 +1,3 @@
-import Sidebar from '@/components/Sidebar/Sidebar';
 import * as React from 'react';
 
 interface pageProps {
@@ -6,9 +5,9 @@ interface pageProps {
 
 const page = ({ }: pageProps) => {
   return (
-   <div className="">
-     {/* <Sidebar/> */}
-      sadfsdf
+   <div>
+     <h1>page</h1>
+     <p>Welcome to the page component!</p>
    </div>
   );
 };
