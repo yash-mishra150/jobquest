@@ -43,7 +43,7 @@ const HeroSection: React.FC = () => {
 
   return (
     <motion.div
-      className="relative min-h-[80vh] px-4 sm:px-8 lg:px-20 py-16 bg-gradient-to-br from-[#CE9FFC]/10 to-[#CE9FFC]/30 text-gray-900 flex items-center justify-center overflow-hidden"
+      className="relative min-h-[90vh] px-4 sm:px-8 lg:px-20 py-16 bg-gradient-to-br from-[#1a0034] to-[#231c2b] text-gray-900 flex items-center justify-center overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -51,7 +51,7 @@ const HeroSection: React.FC = () => {
       {/* Background Image */}
       <motion.div className="absolute inset-0" variants={imageVariants}>
         <Image
-          src="/officeBG.jpg"
+          src="/officeBG2.jpg"
           alt="Professional workspace background"
           fill
           className="object-cover opacity-15 transition-opacity duration-1000"
@@ -62,7 +62,7 @@ const HeroSection: React.FC = () => {
       <div className="relative z-10 flex flex-col items-center gap-8 text-center max-w-4xl mx-auto">
         {/* Headline */}
         <motion.h1
-          className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
+          className="text-3xl sm:text-5xl lg:text-6xl text-white font-bold leading-tight"
           variants={itemVariants}
         >
           Discover & Hire Top Talent <br /> for Any Role
@@ -70,7 +70,7 @@ const HeroSection: React.FC = () => {
 
         {/* Subheadline */}
         <motion.p
-          className="text-base sm:text-lg text-neutral-600 max-w-2xl"
+          className="text-base sm:text-lg text-neutral-400 max-w-2xl"
           variants={itemVariants}
         >
           Connect with skilled professionals and explore exciting career opportunities with leading companies worldwide.
@@ -116,7 +116,7 @@ const HeroSection: React.FC = () => {
         </motion.div>
 
         {/* Stats or CTA */}
-        <motion.div className="flex gap-4 sm:gap-8 text-sm sm:text-base" variants={itemVariants}>
+        <motion.div className="flex gap-4 sm:gap-8 text-white text-sm sm:text-base" variants={itemVariants}>
           <div>
             <span className="font-semibold text-[#7367F0]">500k+</span> Jobs Posted
           </div>

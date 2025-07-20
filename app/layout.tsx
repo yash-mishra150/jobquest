@@ -5,6 +5,8 @@ import { Provider } from "react-redux";
 import { store } from "@/redux/store";
 import ReduxProvider from "./ReduxProvider";
 import Navbar from "@/components/Navbars/Navbar";
+import BaseHeader from "@/components/BaseHeader";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,8 +44,10 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${roboto.variable}`}>
       <body className="antialiased">
         <ReduxProvider>
+          <BaseHeader/>
           <Navbar />
           {children}
+          <Footer />
         </ReduxProvider>
       </body>
     </html>
