@@ -1,4 +1,11 @@
-import { Injectable, Inject, Logger, OnModuleInit, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  OnModuleInit,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { MongoClient, Collection } from 'mongodb';
 import { JwtTokenService } from '../jwt.service';
 
@@ -9,13 +16,16 @@ export class JwtBlacklistService implements OnModuleInit {
 
   constructor(
     @Inject('MONGO_CLIENT') private readonly client: MongoClient,
-    private readonly jwtTokenService: JwtTokenService
+    private readonly jwtTokenService: JwtTokenService,
   ) {}
 
   async onModuleInit() {
     const db = this.client.db();
     this.collection = db.collection('blacklist');
-    await this.collection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 });
+    await this.collection.createIndex(
+      { expireAt: 1 },
+      { expireAfterSeconds: 0 },
+    );
     await this.collection.createIndex({ token: 1 }, { unique: true });
   }
 
@@ -43,7 +53,10 @@ export class JwtBlacklistService implements OnModuleInit {
         return;
       }
       this.logger.error('Error blacklisting token', err);
-      throw new HttpException('Failed to blacklist token', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Failed to blacklist token',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

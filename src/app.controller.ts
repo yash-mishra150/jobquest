@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly moduleRef: ModuleRef
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   @Get()
@@ -29,7 +29,7 @@ export class AppController {
         api: 'healthy',
         naukri: 'healthy',
         shine: 'healthy',
-      }
+      },
     };
   }
 
@@ -40,42 +40,44 @@ export class AppController {
       status: 'checking',
       naukri: 'unknown',
       shine: 'unknown',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     try {
       // Check Naukri service
       const naukriClient = this.moduleRef.get('NAUKRI_SERVICE');
-      const naukriPing = await firstValueFrom(naukriClient.send('ping', {}))
-        .catch(error => {
-          logger.error(`Failed to ping Naukri service: ${error.message}`);
-          return null;
-        });
+      const naukriPing = await firstValueFrom(
+        naukriClient.send('ping', {}),
+      ).catch(error => {
+        logger.error(`Failed to ping Naukri service: ${error.message}`);
+        return null;
+      });
       results.naukri = naukriPing ? 'healthy' : 'unhealthy';
     } catch (error) {
       results.naukri = 'error';
       logger.error(`Error checking Naukri service: ${error.message}`);
     }
-    
+
     try {
       // Check Shine service
       const shineClient = this.moduleRef.get('SHINE_SERVICE');
-      const shinePing = await firstValueFrom(shineClient.send('ping', {}))
-        .catch(error => {
-          logger.error(`Failed to ping Shine service: ${error.message}`);
-          return null;
-        });
+      const shinePing = await firstValueFrom(
+        shineClient.send('ping', {}),
+      ).catch(error => {
+        logger.error(`Failed to ping Shine service: ${error.message}`);
+        return null;
+      });
       results.shine = shinePing ? 'healthy' : 'unhealthy';
     } catch (error) {
       results.shine = 'error';
       logger.error(`Error checking Shine service: ${error.message}`);
     }
-    
-    results.status = 
-      results.naukri === 'healthy' && results.shine === 'healthy' 
-        ? 'healthy' 
+
+    results.status =
+      results.naukri === 'healthy' && results.shine === 'healthy'
+        ? 'healthy'
         : 'degraded';
-    
+
     return results;
   }
 }

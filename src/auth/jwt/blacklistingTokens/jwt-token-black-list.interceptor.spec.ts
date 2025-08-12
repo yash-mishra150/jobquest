@@ -1,7 +1,5 @@
-
 import { JwtTokenBlackListInterceptor } from './jwt-token-black-list.interceptor';
 import { MongoClient, Db, Collection } from 'mongodb';
-
 
 describe('JwtTokenBlackListInterceptor', () => {
   let mockClient: Partial<MongoClient>;

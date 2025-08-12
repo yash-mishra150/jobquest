@@ -2,13 +2,12 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
   Logger,
   Post,
   Req,
   Res,
-  UseGuards,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { RegisterUserDto } from '../dto/register-user.dto';
 import { AuthService } from './auth.service';
@@ -18,6 +17,7 @@ import { JwtTokenBlackListInterceptor } from './jwt/blacklistingTokens/jwt-token
 import { JwtTokenCheckInterceptor } from './jwt/TokenCheck/jwt-token-check.interceptor';
 import { JwtBlacklistService } from './jwt/blacklistingTokens/jwt-blacklist.service';
 import { LoginUserDto } from 'src/dto/login-user.dto';
+import { RoleGuardFactory } from './role.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -34,13 +34,19 @@ export class AuthController {
   ): Promise<any> {
     const result = await this.authservice.loginUser(userdto);
 
-    Logger.log(result);
+    Logger.log(`Login successful for: ${result.email} (${result.userType})`);
 
     const payload = {
       sub: result.id,
+      email: result.email,
       phone: result.phone,
       name: result.name,
-      userType: result.userType,
+      Role:
+        result.userType === 'Candidate'
+          ? 'ROLE_CANDIDATE'
+          : result.userType === 'Employer'
+            ? 'ROLE_EMPLOYER'
+            : '',
     };
 
     const accessToken = await this.jwtTokenService.signToken(payload, '1d');
@@ -63,20 +69,24 @@ export class AuthController {
         sameSite: 'lax',
       });
 
-    return res.send({ message: 'User loggedin successfully' });
+    return res.send({
+      message: 'User logged in successfully',
+    });
   }
 
-  @Post('create')
+  @Post('register')
   async registerUser(@Body() userdto: RegisterUserDto): Promise<any> {
     const result = await this.authservice.registerUser(userdto);
 
-    return { message: 'User registered successfully' };
+    return {
+      message: 'User registered successfully',
+    };
   }
 
-  @UseInterceptors(JwtTokenCheckInterceptor)
-  @UseInterceptors(JwtTokenBlackListInterceptor)
+  @UseInterceptors(JwtTokenCheckInterceptor, JwtTokenBlackListInterceptor)
+  @UseGuards(RoleGuardFactory('ROLE_EMPLOYER'))
   @Get('profile')
-  getProfile(@Req() req) {
+  getProfile(@Req() req: { user: any }) {
     // req.user will have the validated JWT payload (from validate() in JwtStrategy)
     return {
       message: 'Protected profile info',

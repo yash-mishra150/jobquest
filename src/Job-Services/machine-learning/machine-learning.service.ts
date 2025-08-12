@@ -4,8 +4,6 @@ import axios from 'axios';
 import * as FormData from 'form-data';
 import { OpportunityDto } from 'src/dto/Opportunity.dto';
 
-
-
 @Injectable()
 export class MachineLearningService {
   private readonly BaseUrl: string;

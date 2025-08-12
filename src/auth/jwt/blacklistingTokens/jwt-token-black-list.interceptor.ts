@@ -14,13 +14,13 @@ import { Observable } from 'rxjs';
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 @Injectable()
-export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleInit {
+export class JwtTokenBlackListInterceptor
+  implements NestInterceptor, OnModuleInit
+{
   private readonly logger = new Logger(JwtTokenBlackListInterceptor.name);
   private collection: Collection;
 
-  constructor(
-    @Inject('MONGO_CLIENT') private readonly client: MongoClient,
-  ) {}
+  constructor(@Inject('MONGO_CLIENT') private readonly client: MongoClient) {}
 
   async onModuleInit() {
     try {
@@ -28,7 +28,10 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
       this.collection = db.collection('blacklist');
 
       // Create TTL index on expireAt for automatic deletion
-      await this.collection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 });
+      await this.collection.createIndex(
+        { expireAt: 1 },
+        { expireAfterSeconds: 0 },
+      );
       // Unique index on token for fast lookup & uniqueness
       await this.collection.createIndex({ token: 1 }, { unique: true });
       // Index on userId for querying if needed
@@ -40,10 +43,16 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
     }
   }
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     if (!this.collection) {
       this.logger.error('Blacklist collection not initialized');
-      throw new HttpException('Server not ready', HttpStatus.SERVICE_UNAVAILABLE);
+      throw new HttpException(
+        'Server not ready',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
 
     const req = context.switchToHttp().getRequest<FastifyRequest>();
@@ -55,10 +64,13 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
 
     // Fallback: parse cookies manually if not found
     if ((!accessToken || !refreshToken) && req.headers.cookie) {
-      const cookieObj = req.headers.cookie
+      const cookieObj: { [key: string]: string } = req.headers.cookie
         .split(';')
         .map(c => c.trim().split('='))
-        .reduce((acc, [key, val]) => ({ ...acc, [key]: decodeURIComponent(val) }), {});
+        .reduce(
+          (acc, [key, val]) => ({ ...acc, [key]: decodeURIComponent(val) }),
+          {},
+        );
       accessToken = accessToken || cookieObj['access_token'];
       refreshToken = refreshToken || cookieObj['refresh_token'];
     }
@@ -76,7 +88,10 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
     });
 
     if (!accessToken && !refreshToken) {
-      throw new HttpException('No authentication tokens provided', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        'No authentication tokens provided',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     try {
@@ -95,7 +110,10 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
           blacklistedRefreshToken: !!blacklistedRefreshToken,
         });
 
-        throw new HttpException('Token has been blacklisted', HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          'Token has been blacklisted',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       this.logger.log('Tokens are not blacklisted', {
@@ -112,9 +130,10 @@ export class JwtTokenBlackListInterceptor implements NestInterceptor, OnModuleIn
         url: req.url,
       });
 
-      throw new HttpException(error.message || 'Invalid or expired token', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+        error.message || 'Invalid or expired token',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
   }
-
-  
 }

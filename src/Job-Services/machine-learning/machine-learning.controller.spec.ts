@@ -9,7 +9,9 @@ describe('MachineLearningController', () => {
       controllers: [MachineLearningController],
     }).compile();
 
-    controller = module.get<MachineLearningController>(MachineLearningController);
+    controller = module.get<MachineLearningController>(
+      MachineLearningController,
+    );
   });
 
   it('should be defined', () => {

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtTokenService } from './jwt.service';
 
-
 describe('JwtService', () => {
   let service: JwtTokenService;
 

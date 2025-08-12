@@ -9,7 +9,9 @@ describe('CompanyLegitimacyController', () => {
       controllers: [CompanyLegitimacyController],
     }).compile();
 
-    controller = module.get<CompanyLegitimacyController>(CompanyLegitimacyController);
+    controller = module.get<CompanyLegitimacyController>(
+      CompanyLegitimacyController,
+    );
   });
 
   it('should be defined', () => {

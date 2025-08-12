@@ -13,9 +13,7 @@ export class JwtTokenService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-
   ) {
-
     // const pk = process.env.JWT_PRIVATE_KEY?.replace(/\\n/g, '\n');
     // Logger.log(pk)
     // Correct keys with proper fallback error handling
@@ -29,7 +27,7 @@ export class JwtTokenService {
     return this.jwtService.signAsync(payload, {
       algorithm: 'RS256',
       privateKey: this.privateKey,
-      expiresIn
+      expiresIn,
     });
   }
 

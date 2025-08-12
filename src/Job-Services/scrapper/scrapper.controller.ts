@@ -1,193 +1,149 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { NaukriService } from './naukri/naukri.service';
 import { ScrapperQueryDto } from 'src/dto/scrapper.dto';
 import { ShineService } from './shine/shine.service';
 import { TimesjobService } from './timesjobs/timesjob.service';
 import { ScrapperThreadService } from './thread.service';
+import { JobDto, JobResponseDto } from 'src/dto/job-response.dto';
+
+interface CacheData {
+  timestamp: number;
+  data: JobResponseDto;
+}
+
+interface CombinedJob extends JobDto {
+  source: string;
+}
 
 @Controller('scrapper')
-export class ScrapperController {  constructor(
+export class ScrapperController {
+  constructor(
     private readonly naukriService: NaukriService,
     private readonly shineService: ShineService,
     private readonly timesjobService: TimesjobService,
     private readonly threadService: ScrapperThreadService,
-  ) { }
+  ) {}
 
-  // Simple in-memory cache for combined requests
-  private cache: Map<string, { timestamp: number, data: any }> = new Map();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache expiry
+  private cache: Map<string, CacheData> = new Map();
+  private readonly CACHE_TTL = 5 * 60 * 1000;
 
-  // Generate cache key from request parameters
-  private getCacheKey(params: any): string {
+  private getCacheKey(params: ScrapperQueryDto): string {
     const { search, page, size } = params;
     return `combined:${search || 'all'}:${page || 1}:${size || 10}`;
   }
-  // Check if we have a valid cached response
-  private getCachedResponse(key: string): any | null {
+
+  private getCachedResponse(key: string): JobResponseDto | null {
     if (!this.cache.has(key)) return null;
-    
     const cached = this.cache.get(key);
     if (!cached) return null;
-    
     const now = Date.now();
-    
     if (now - cached.timestamp > this.CACHE_TTL) {
-      // Cache expired
       this.cache.delete(key);
       return null;
     }
-    
     console.log(`Using cached response for ${key}`);
     return cached.data;
   }
 
-  // Store response in cache
-  private cacheResponse(key: string, data: any): void {
+  private cacheResponse(key: string, data: JobResponseDto): void {
     this.cache.set(key, {
       timestamp: Date.now(),
-      data
+      data,
     });
     console.log(`Cached response for ${key}`);
   }
+
   @Post('naukri')
-  async getJobs(@Body() bodyParams: ScrapperQueryDto) {
-    // Ensure size is properly set
+  async getJobs(@Body() bodyParams: ScrapperQueryDto): Promise<JobResponseDto> {
     const size = bodyParams.size || 10;
     bodyParams.size = size;
-    
-    // Set appropriate flags for better performance
-    if (!bodyParams.hasOwnProperty('fetchDetails')) {
-      bodyParams.fetchDetails = true; // Default to fetching details for individual endpoint
+    if (typeof bodyParams.fetchDetails === 'undefined') {
+      bodyParams.fetchDetails = true;
     }
-    
-    // Add thread service support
-    (bodyParams as any).useThreads = true;
-    
+    (bodyParams as ScrapperQueryDto & { useThreads: boolean }).useThreads = true;
     return this.naukriService.getJobs(bodyParams);
   }
+
   @Post('shine')
-  async getJobsShine(@Body() bodyParams: ScrapperQueryDto) {
-    // Ensure size is properly set
+  async getJobsShine(@Body() bodyParams: ScrapperQueryDto): Promise<JobResponseDto> {
     const size = bodyParams.size || 10;
     bodyParams.size = size;
-    
-    // Set appropriate flags for better performance
-    if (!bodyParams.hasOwnProperty('fetchDetails')) {
-      bodyParams.fetchDetails = true; // Default to fetching details for individual endpoint
+    if (typeof bodyParams.fetchDetails === 'undefined') {
+      bodyParams.fetchDetails = true;
     }
-    
-    // Add thread service support for parallelization
-    (bodyParams as any).useThreads = true;
-    
+    (bodyParams as ScrapperQueryDto & { useThreads: boolean }).useThreads = true;
     return this.shineService.getJobs(bodyParams);
   }
 
   @Post('timesjobs')
-  async getJobsTimesJobs(@Body() bodyParams: ScrapperQueryDto) {
-    // Ensure size is properly set
+  async getJobsTimesJobs(@Body() bodyParams: ScrapperQueryDto): Promise<JobResponseDto> {
     const size = bodyParams.size || 10;
     bodyParams.size = size;
-    
-    // Set appropriate flags for better performance
-    if (!bodyParams.hasOwnProperty('fetchDetails')) {
-      bodyParams.fetchDetails = true; // Default to fetching details for individual endpoint
+    if (typeof bodyParams.fetchDetails === 'undefined') {
+      bodyParams.fetchDetails = true;
     }
-    
-    // Add thread service support for parallelization
-    (bodyParams as any).useThreads = true;
-    
+    (bodyParams as ScrapperQueryDto & { useThreads: boolean }).useThreads = true;
     return this.timesjobService.getJobs(bodyParams);
   }
 
   @Post('combined')
-  async getCombinedJobs(@Body() bodyParams: ScrapperQueryDto) {
-    // Just forward to the combinedFaster implementation
+  async getCombinedJobs(@Body() bodyParams: ScrapperQueryDto): Promise<JobResponseDto> {
     return this.getCombinedFasterJobs(bodyParams);
   }
 
   @Post('combinedfaster')
-  async getCombinedFasterJobs(@Body() bodyParams: ScrapperQueryDto) {
+  async getCombinedFasterJobs(@Body() bodyParams: ScrapperQueryDto): Promise<JobResponseDto> {
     const size = bodyParams.size || 10;
     const page = bodyParams.page || 1;
-
-    // Check cache for existing response
     const cacheKey = `faster:${this.getCacheKey(bodyParams)}`;
     const cachedResponse = this.getCachedResponse(cacheKey);
     if (cachedResponse) {
       return cachedResponse;
     }
-
-    // Optimize for performance by default
     const shouldFetchDetails = bodyParams.fetchDetails === true;
-    const isFastMode = (bodyParams as any)._fastMode !== false; // Default to fast mode
-    
-    // Split the requested size evenly between both services
-    // For size=10, get 5 from TimesJobs and 5 from Shine
-    const perServiceSize = Math.ceil(size / 2); // Each service gets half of the requested size
-    
-    // Fast test requests - set all flags for maximum performance
-    const testParams = { 
-      ...bodyParams, 
-      size: 1, 
+    const perServiceSize = Math.ceil(size / 2);
+    const testParams: ScrapperQueryDto = {
+      ...bodyParams,
+      size: 1,
       page: 1,
       fetchDetails: false,
       _isTestRequest: true,
-      _fastMode: true
+      _fastMode: true,
     };
-    
     console.time('combined-faster-jobs');
     try {
-      // Make small test requests to determine availability - run in parallel
       const [timesJobsTestResponse, shineTestResponse] = await Promise.all([
         this.timesjobService.getJobs(testParams),
-        this.shineService.getJobs(testParams)
+        this.shineService.getJobs(testParams),
       ]);
-      
       console.timeLog('combined-faster-jobs', 'Test requests completed');
-      
       const timesJobsTotal = timesJobsTestResponse.total || 0;
       const shineTotal = shineTestResponse.total || 0;
       const totalAvailable = timesJobsTotal + shineTotal;
-      
-      // Allocate job distribution
-      let timesJobsSize, shineSize;
-      
-      // Empty result handling
+      let timesJobsSize: number, shineSize: number;
       if (totalAvailable === 0) {
-        // If no results found, try both services with equal distribution
         timesJobsSize = perServiceSize;
         shineSize = perServiceSize;
       } else {
-        // Always get exactly half of the requested size from each service if possible
         timesJobsSize = perServiceSize;
         shineSize = perServiceSize;
-        
-        // If one service has fewer results than its allocation, shift the remaining to the other
         if (timesJobsTotal < perServiceSize && shineTotal > perServiceSize) {
-          // TimesJobs has fewer results than allocated, shift the remaining to Shine
           const shortfall = perServiceSize - timesJobsTotal;
           timesJobsSize = Math.max(0, timesJobsTotal);
           shineSize = Math.min(shineTotal, perServiceSize + shortfall);
         } else if (shineTotal < perServiceSize && timesJobsTotal > perServiceSize) {
-          // Shine has fewer results than allocated, shift the remaining to TimesJobs
           const shortfall = perServiceSize - shineTotal;
           shineSize = Math.max(0, shineTotal);
           timesJobsSize = Math.min(timesJobsTotal, perServiceSize + shortfall);
         } else {
-          // Both services have enough results
           timesJobsSize = Math.min(timesJobsTotal, perServiceSize);
           shineSize = Math.min(shineTotal, perServiceSize);
         }
       }
-      
-      // Ensure we're requesting exactly the needed number from each service
-      // We want timesJobsSize + shineSize to be exactly equal to size
       const totalRequestedSize = timesJobsSize + shineSize;
       if (totalRequestedSize > size) {
-        // If we're requesting too many, reduce proportionally
         const reduction = totalRequestedSize - size;
         if (timesJobsSize > 0 && shineSize > 0) {
-          // Distribute the reduction proportionally
           const timesJobsReduction = Math.floor(reduction * (timesJobsSize / totalRequestedSize));
           const shineReduction = reduction - timesJobsReduction;
           timesJobsSize = Math.max(0, timesJobsSize - timesJobsReduction);
@@ -198,112 +154,73 @@ export class ScrapperController {  constructor(
           shineSize = Math.max(0, shineSize - reduction);
         }
       }
-      
       console.log(`Optimized distribution - TimesJobs: ${timesJobsSize}, Shine: ${shineSize} (Total: ${timesJobsSize + shineSize})`);
-      
-      // Run requests with optimized parameters
-      const timesJobsParams = { 
-        ...bodyParams, 
-        size: timesJobsSize, 
+      const timesJobsParams: ScrapperQueryDto = {
+        ...bodyParams,
+        size: timesJobsSize,
         page,
         fetchDetails: shouldFetchDetails,
-        useThreads: true, // Ensure ThreadService is used
-        _fastMode: true,   // Add fast mode flag to optimize performance
-        _minimizeDetails: true, // Reduce amount of data returned
-        _skipDescriptions: !shouldFetchDetails // Skip lengthy descriptions for better performance
+        useThreads: true,
+        _fastMode: true,
+        _minimizeDetails: true,
+        _skipDescriptions: !shouldFetchDetails,
       };
-      
-      const shineParams = { 
-        ...bodyParams, 
-        size: shineSize, 
+      const shineParams: ScrapperQueryDto = {
+        ...bodyParams,
+        size: shineSize,
         page,
         fetchDetails: shouldFetchDetails,
-        _fastMode: true,   // Add fast mode flag to optimize performance
-        _minimizeDetails: true, // Reduce amount of data returned
-        _skipDescriptions: !shouldFetchDetails // Skip lengthy descriptions for better performance
+        _fastMode: true,
+        _minimizeDetails: true,
+        _skipDescriptions: !shouldFetchDetails,
       };
-      
-      // Run both requests in parallel with timeout to prevent hanging
-      console.log(`Starting parallel scraping with TimesJobs(${timesJobsSize}) and Shine(${shineSize})`);
-      const startTime = Date.now();
-      
-      // Add a timeout promise to prevent hanging
-      const timeout = new Promise<any>(resolve => {
+      const timeout = new Promise<JobResponseDto>(resolve => {
         setTimeout(() => {
           console.warn('Scraping operation timed out after 15 seconds');
-          resolve({ data: [], total: 0, timedOut: true });
-        }, 15000); // 15 seconds timeout - more reasonable for larger requests
+          resolve({
+            success: false,
+            message: 'Timeout',
+            data: [],
+            page,
+            size,
+            total: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false,
+          });
+        }, 15000);
       });
-      
-      // Race the requests against the timeout
       const [timesJobsResponse, shineResponse] = await Promise.all([
-        timesJobsSize > 0 
-          ? Promise.race([this.timesjobService.getJobs(timesJobsParams), timeout]) 
-          : { data: [], total: 0 },
-        shineSize > 0 
-          ? Promise.race([this.shineService.getJobs(shineParams), timeout]) 
-          : { data: [], total: 0 }
+        timesJobsSize > 0 ? Promise.race([this.timesjobService.getJobs(timesJobsParams), timeout]) : { data: [], total: 0 },
+        shineSize > 0 ? Promise.race([this.shineService.getJobs(shineParams), timeout]) : { data: [], total: 0 },
       ]);
-      
-      const processingTime = Date.now() - startTime;
+      const processingTime = Date.now() - Date.now();
       console.log(`Parallel scraping completed in ${processingTime}ms`);
       console.timeLog('combined-faster-jobs', 'Main requests completed');
-      
-      // Process results
-      const timesJobsJobs = timesJobsResponse.data || [];
-      const shineJobs = shineResponse.data || [];
+      const timesJobsJobs: JobDto[] = (timesJobsResponse.data as JobDto[]) || [];
+      const shineJobs: JobDto[] = (shineResponse.data as JobDto[]) || [];
       console.log(`Actual jobs returned - TimesJobs: ${timesJobsJobs.length}, Shine: ${shineJobs.length}`);
-      
-      // Handle potential failures from either service
       if (timesJobsSize > 0 && timesJobsJobs.length === 0) {
-        console.warn("TimesJobs returned 0 jobs despite being requested - this may indicate a problem");
+        console.warn('TimesJobs returned 0 jobs despite being requested - this may indicate a problem');
       }
-      
       if (shineSize > 0 && shineJobs.length === 0) {
-        console.warn("Shine returned 0 jobs despite being requested - this may indicate a problem");
+        console.warn('Shine returned 0 jobs despite being requested - this may indicate a problem');
       }
-      
-      // Combine jobs in an alternating pattern to ensure fair representation
-      let combinedJobs: any[] = [];
+      const combinedJobs: CombinedJob[] = [];
       const maxLength = Math.max(timesJobsJobs.length, shineJobs.length);
-      
       for (let i = 0; i < maxLength; i++) {
-        if (i < timesJobsJobs.length) combinedJobs.push(timesJobsJobs[i]);
-        if (i < shineJobs.length) combinedJobs.push(shineJobs[i]);
+        if (i < timesJobsJobs.length) combinedJobs.push({ ...timesJobsJobs[i], source: 'timesjobs' });
+        if (i < shineJobs.length) combinedJobs.push({ ...shineJobs[i], source: 'shine' });
       }
-      
-      // Add source field to each job if not already present
-      const taggedJobs = combinedJobs.map(job => {
-        if (job.source) return job;
-        
-        const isFromTimesJobs = timesJobsJobs.some(timesJob => timesJob.link === job.link);
-        return {
-          ...job,
-          source: isFromTimesJobs ? 'timesjobs' : 'shine'
-        };
-      });
-      
-      // Calculate pagination info
+      const resultData = combinedJobs.slice(0, size);
+      const timesJobsCount = resultData.filter(job => job.source === 'timesjobs').length;
+      const shineCount = resultData.filter(job => job.source === 'shine').length;
       const totalTimesJobsJobs = timesJobsResponse.total || 0;
       const totalShineJobs = shineResponse.total || 0;
       const totalJobs = totalTimesJobsJobs + totalShineJobs;
       const totalPages = Math.ceil(totalJobs / size);
-      
       console.timeEnd('combined-faster-jobs');
-      
-      // Ensure we return exactly the requested number of jobs if available
-      const resultData = taggedJobs.slice(0, size);
-      
-      // Log if we couldn't get enough jobs
-      if (resultData.length < size && combinedJobs.length > 0) {
-        console.warn(`Could only return ${resultData.length} jobs, fewer than the requested ${size}`);
-      }
-      
-      // Count how many jobs we actually got from each source
-      const timesJobsCount = resultData.filter(job => job.source === 'timesjobs').length;
-      const shineCount = resultData.filter(job => job.source === 'shine').length;
-      
-      const response = {
+      const response: JobResponseDto = {
         success: true,
         message: `Combined jobs from TimesJobs(${timesJobsCount}) and Shine(${shineCount})`,
         data: resultData,
@@ -317,32 +234,83 @@ export class ScrapperController {  constructor(
           timesjobs: {
             count: timesJobsCount,
             total: totalTimesJobsJobs,
-            requested: timesJobsSize
+            requested: timesJobsSize,
           },
           shine: {
             count: shineCount,
             total: totalShineJobs,
-            requested: shineSize
-          }
-        }
+            requested: shineSize,
+          },
+        },
       };
-
-      // Cache the response
       this.cacheResponse(cacheKey, response);
-
       return response;
-    } catch (error) {
-      console.error("Error fetching combined jobs:", error);
+    } catch (error: unknown) {
+      let message = 'Unknown error';
+      if (error instanceof Error) message = error.message;
       return {
         success: false,
-        message: "Error fetching combined jobs: " + error.message,
+        message: 'Error fetching combined jobs: ' + message,
         data: [],
         page,
         size,
         total: 0,
         totalPages: 0,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
+      };
+    }
+  }
+
+  @Get('featured')
+  async getFeaturedJobs(): Promise<JobResponseDto> {
+    const timesJobsParams: ScrapperQueryDto = {
+      size: 5,
+      page: 1,
+      fetchDetails: true,
+      useThreads: true,
+      _fastMode: true,
+      search: 'office-jobs',
+    };
+    const shineParams: ScrapperQueryDto = {
+      size: 5,
+      page: 1,
+      fetchDetails: true,
+      useThreads: true,
+      _fastMode: true,
+      search: 'remote-jobs',
+    };
+    try {
+      const [timesJobs, shine] = await Promise.all([
+        this.timesjobService.getJobs(timesJobsParams),
+        this.shineService.getJobs(shineParams),
+      ]);
+      let jobs: JobDto[] = [...(timesJobs.data || []), ...(shine.data || [])];
+      jobs = jobs.sort(() => Math.random() - 0.5);
+      return {
+        success: true,
+        message: 'Featured jobs for guests',
+        data: jobs.slice(0, 10),
+        page: 1,
+        size: 10,
+        total: jobs.length,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
+      };
+    } catch (error: unknown) {
+      let message = 'Unknown error';
+      if (error instanceof Error) message = error.message;
+      return {
+        success: false,
+        message: 'Could not fetch featured jobs: ' + message,
+        data: [],
+        page: 1,
+        size: 10,
+        total: 0,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPrevPage: false,
       };
     }
   }

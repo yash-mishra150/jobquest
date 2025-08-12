@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IpMiddleware } from './middleware/ipRestriction/ip.middleware';
@@ -17,18 +17,22 @@ import { CompanyLegitimacyController } from './Job-Services/company-legitimacy/c
 import { CompanyLegitimacyService } from './Job-Services/company-legitimacy/company-legitimacy.service';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    AuthModule,
-    MongodbModule,
-    HealthModule,
-  ],
+  imports: [ConfigModule.forRoot(), AuthModule, MongodbModule, HealthModule],
   controllers: [
-    AppController, 
-    MachineLearningController, 
-    ScrapperController, CompanyLegitimacyController,
+    AppController,
+    MachineLearningController,
+    ScrapperController,
+    CompanyLegitimacyController,
   ],
-  providers: [AppService, MachineLearningService, NaukriService, ShineService, ScrapperThreadService, CompanyLegitimacyService, TimesjobService],
+  providers: [
+    AppService,
+    MachineLearningService,
+    NaukriService,
+    ShineService,
+    ScrapperThreadService,
+    CompanyLegitimacyService,
+    TimesjobService,
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

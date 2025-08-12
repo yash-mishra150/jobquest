@@ -1,5 +1,10 @@
-// filepath: c:\Projects\jobquest\jobquestbackend\src\Job-Services\scrapper\dto\scrapper.dto.ts
-import { IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ScrapperQueryDto {
@@ -16,40 +21,40 @@ export class ScrapperQueryDto {
   @Type(() => Number)
   @IsNumber()
   size?: number;
-  
+
   @IsOptional()
   @IsArray()
   jobs?: string[];
-  
+
   @IsOptional()
   @IsArray()
   locations?: string[];
-  
+
   @IsOptional()
   @IsBoolean()
   work_from_home?: boolean;
-  
+
   @IsOptional()
   @IsBoolean()
   work_from_office?: boolean;
-  
+
   @IsOptional()
   @IsBoolean()
   hybrid?: boolean;
-  
+
   @IsOptional()
   @IsString()
   jobAge?: string;
-  
+
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
   max_duration?: number;
-  
+
   @IsOptional()
   @IsString()
   start_date?: string;
-  
+
   @IsOptional()
   @IsBoolean()
   job_offer?: boolean;
@@ -69,6 +74,18 @@ export class ScrapperQueryDto {
   @IsOptional()
   @IsBoolean()
   useThreads?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  _fastMode?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  _minimizeDetails?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  _skipDescriptions?: boolean;
 }
 
 export class InternshipDto {

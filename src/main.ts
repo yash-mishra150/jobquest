@@ -10,13 +10,14 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import fastifyCookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
+import { GlobalExceptionFilter } from './filters/global-exception.filter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const fastifyAdapter = new FastifyAdapter();
 
   await fastifyAdapter.register(fastifyCookie, {
-    secret: process.env.COOKIE_SECRET || 'my-secret', 
+    secret: process.env.COOKIE_SECRET || 'my-secret',
     parseOptions: {},
   });
 
@@ -35,6 +36,14 @@ async function bootstrap() {
         styleSrc: [`'self'`, `'unsafe-inline'`],
       },
     },
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    xFrameOptions: { action: 'deny' },
+    xContentTypeOptions: true,
+    referrerPolicy: { policy: 'no-referrer' },
   });
 
   // Rate limiting
@@ -46,8 +55,18 @@ async function bootstrap() {
     },
   });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
   app.useGlobalGuards(new LoggerGuard());
+
+  // Register global exception filter
+  app.useGlobalFilters(new GlobalExceptionFilter());
+
   app.enableCors({
     origin: true,
     credentials: true,
@@ -55,7 +74,7 @@ async function bootstrap() {
 
   // Get port from environment variable (important for Render)
   const port = process.env.PORT || 3000;
-  
+
   // For Render deployment, we need to listen on 0.0.0.0
   await app.listen(port, '0.0.0.0');
   logger.log(`Application is running on: ${await app.getUrl()}`);

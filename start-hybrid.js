@@ -9,20 +9,20 @@ const command = 'node dist/main.js';
 console.log(`Executing command: ${command}`);
 const child = exec(command);
 
-child.stdout.on('data', (data) => {
+child.stdout.on('data', data => {
   console.log(data.toString().trim());
 });
 
-child.stderr.on('data', (data) => {
+child.stderr.on('data', data => {
   console.error(data.toString().trim());
 });
 
-child.on('error', (error) => {
+child.on('error', error => {
   console.error(`Failed to start process: ${error.message}`);
   process.exit(1);
 });
 
-child.on('exit', (code) => {
+child.on('exit', code => {
   console.log(`Process exited with code ${code}`);
   process.exit(code);
 });
