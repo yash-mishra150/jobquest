@@ -1499,10 +1499,12 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
-"@types/bcryptjs@^2.4.6":
-  version "2.4.6"
-  resolved "https://registry.npmjs.org/@types/bcryptjs/-/bcryptjs-2.4.6.tgz"
-  integrity sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==
+"@types/bcryptjs@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/bcryptjs/-/bcryptjs-3.0.0.tgz#d7be11653aa82cf17ffee4f3925f1f80cfc1add2"
+  integrity sha512-WRZOuCuaz8UcZZE4R5HXTco2goQSI2XxjGY3hbM/xDvwmqFWd4ivooImsMx65OKM6CtNKbnZ5YL+YwAwK7c1dg==
+  dependencies:
+    bcryptjs "*"
 
 "@types/body-parser@*":
   version "1.19.5"
@@ -2392,6 +2394,11 @@ basic-ftp@^5.0.2:
   version "5.0.5"
   resolved "https://registry.npmjs.org/basic-ftp/-/basic-ftp-5.0.5.tgz"
   integrity sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==
+
+bcryptjs@*:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-3.0.2.tgz#caadcca1afefe372ed6e20f86db8e8546361c1ca"
+  integrity sha512-k38b3XOZKv60C4E2hVsXTolJWfkGRMbILBIe2IBITXciy5bOsTKot5kDrf3ZfufQtQOUN5mXceUEpU1rTl9Uog==
 
 bcryptjs@^2.4.3:
   version "2.4.3"
@@ -6615,7 +6622,7 @@ ws@^8.18.3:
 
 xss@^1.0.15:
   version "1.0.15"
-  resolved "https://registry.yarnpkg.com/xss/-/xss-1.0.15.tgz#96a0e13886f0661063028b410ed1b18670f4e59a"
+  resolved "https://registry.npmjs.org/xss/-/xss-1.0.15.tgz"
   integrity sha512-FVdlVVC67WOIPvfOwhoMETV72f6GbW7aOabBC3WxN/oUdoEMDyLz4OgRv5/gck2ZeNqEQu+Tb0kloovXOfpYVg==
   dependencies:
     commander "^2.20.3"
