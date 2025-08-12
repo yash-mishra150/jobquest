@@ -2,14 +2,37 @@ import {
   BadRequestException,
   Controller,
   Post,
-  UploadedFile,
+  Body,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { MachineLearningService } from './machine-learning.service';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { OpportunityDto } from 'src/dto/Opportunity.dto';
 import { JwtTokenCheckInterceptor } from 'src/auth/jwt/TokenCheck/jwt-token-check.interceptor';
 import { JwtTokenBlackListInterceptor } from 'src/auth/jwt/blacklistingTokens/jwt-token-black-list.interceptor';
+import { FastifyRequest } from 'fastify';
+
+interface FastifyFile {
+  encoding: string;
+  fieldname: string;
+  filename: string;
+  mimetype: string;
+  buffer: Buffer;
+  size: number;
+}
+
+// Define interfaces for return types
+interface ResumeExtractResult {
+  // Add properties based on the actual return type
+  success: boolean;
+  data: Record<string, unknown>;
+}
+
+interface JobVerifyResult {
+  // Add properties based on the actual return type
+  success: boolean;
+  data: Record<string, unknown>;
+}
 
 @Controller('machine-learning')
 export class MachineLearningController {
@@ -18,19 +41,25 @@ export class MachineLearningController {
   @UseInterceptors(JwtTokenCheckInterceptor)
   @UseInterceptors(JwtTokenBlackListInterceptor)
   @Post('extractResume')
-  @UseInterceptors(FileInterceptor('resume'))
-  async uploadResume(@UploadedFile() file: any) {
+  async uploadResume(
+    @Req() request: FastifyRequest,
+  ): Promise<ResumeExtractResult> {
+    // Access the file from the raw request
+    const rawRequest = request.raw;
+    // @ts-expect-error - Fastify multipart adds this property
+    const file = (await rawRequest.file()) as FastifyFile;
+    
     if (!file || !file.buffer) {
       throw new BadRequestException('PDF resume is required');
     }
 
-    return await this.mlServices.extractResume(file);
+    return this.mlServices.extractResume(file) as Promise<ResumeExtractResult>;
   }
 
   @UseInterceptors(JwtTokenCheckInterceptor)
   @UseInterceptors(JwtTokenBlackListInterceptor)
   @Post('jobVerify')
-  async VerifyJobs(jobDTO: OpportunityDto): Promise<any> {
-    return this.mlServices.jobVerify(jobDTO);
+  async VerifyJobs(@Body() jobDTO: OpportunityDto): Promise<JobVerifyResult> {
+    return this.mlServices.jobVerify(jobDTO) as Promise<JobVerifyResult>;
   }
 }

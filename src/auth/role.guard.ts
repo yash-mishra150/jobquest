@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { JwtTokenService } from './jwt/jwt.service';
 
 // Usage: @UseGuards(RoleGuardFactory('ROLE_CANDIDATE'))
@@ -16,7 +16,7 @@ export function RoleGuardFactory(requiredRole: string) {
     constructor(public readonly jwtTokenService: JwtTokenService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      const request = context.switchToHttp().getRequest<Request>();
+      const request = context.switchToHttp().getRequest<FastifyRequest>();
       const token = request.cookies?.access_token;
       if (!token) {
         throw new UnauthorizedException(

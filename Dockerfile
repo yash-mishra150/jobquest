@@ -24,5 +24,5 @@ EXPOSE 3002
 # Set production environment
 ENV NODE_ENV=production
 
-# Use the hybrid main file that runs everything in one process
-CMD ["node", "dist/hybrid-main.js"]
+# Use the main file to run the application
+CMD ["node", "dist/main.js"]
