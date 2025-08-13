@@ -9,7 +9,7 @@ import { MongoClient } from 'mongodb';
 import { RegisterUserDto } from '../dto/register-user.dto';
 import { LoginUserDto } from 'src/dto/login-user.dto';
 // Use bcryptjs instead of bcrypt for better TypeScript compatibility
-import * as bcrypt from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 import { UserType } from '../dto/base-user.dto';
 import xss from 'xss';
 
