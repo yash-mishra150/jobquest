@@ -22,9 +22,7 @@ export class AuthService {
     const usersCollection = db.collection('users');
 
     // Debug: log the query
-    Logger.log(
-      `Login attempt: email=${userDto.email}, userType=${userDto.userType}`,
-    );
+    Logger.log(`Login attempt: email=${userDto.email}, userType=${userDto.userType}`);
 
     // Find by email only
     const existingUser = await usersCollection.findOne({
@@ -40,9 +38,7 @@ export class AuthService {
 
     // Check userType match
     if (existingUser.userType !== userDto.userType) {
-      throw new UnauthorizedException(
-        'User type does not match for this email',
-      );
+      throw new UnauthorizedException('User type does not match for this email');
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -102,10 +98,7 @@ export class AuthService {
 
     // Hash password before storing
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(
-      sanitizedUserDto.password,
-      saltRounds,
-    );
+    const hashedPassword = await bcrypt.hash(sanitizedUserDto.password, saltRounds);
 
     // Build user object with explicit typing
     interface BaseUser {
@@ -152,14 +145,10 @@ export class AuthService {
     }
 
     // Insert user into database
-    const result = await usersCollection.insertOne(
-      userObject as import('mongodb').OptionalId<import('mongodb').Document>,
-    );
+    const result = await usersCollection.insertOne(userObject as import('mongodb').OptionalId<import('mongodb').Document>);
 
     // Log successful registration
-    Logger.log(
-      `New user registered: ${sanitizedUserDto.email} (${sanitizedUserDto.userType})`,
-    );
+    Logger.log(`New user registered: ${sanitizedUserDto.email} (${sanitizedUserDto.userType})`);
 
     return { id: result.insertedId.toString() };
   }
