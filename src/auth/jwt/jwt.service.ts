@@ -1,9 +1,16 @@
 // src/auth/jwt.service.ts
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
-import * as path from 'path';
+
+// Define an interface for the token payload
+export interface TokenPayload {
+  email: string;
+  name: string;
+  phone: string;
+  Role: string;
+  [key: string]: any;
+}
 
 @Injectable()
 export class JwtTokenService {

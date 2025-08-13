@@ -22,8 +22,8 @@ export class JwtTokenCheckInterceptor implements NestInterceptor {
     const req = context.switchToHttp().getRequest<FastifyRequest>();
     const res = context.switchToHttp().getResponse<FastifyReply>();
 
-    let accessToken = req.cookies?.access_token;
-    let refreshToken = req.cookies?.refresh_token;
+    const accessToken = req.cookies?.access_token;
+    const refreshToken = req.cookies?.refresh_token;
 
     if (!refreshToken) {
       throw new HttpException('Session is Over', HttpStatus.UNAUTHORIZED);
