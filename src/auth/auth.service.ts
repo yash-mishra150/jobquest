@@ -16,7 +16,7 @@ import xss from 'xss';
 
 @Injectable()
 export class AuthService {
-  constructor(@Inject('MONGO_CLIENT') private readonly client: MongoClient) {}
+  constructor(@Inject('MONGO_CLIENT') private readonly client: MongoClient) { }
 
   async loginUser(userDto: LoginUserDto): Promise<any> {
     const db = this.client.db();
@@ -196,11 +196,11 @@ export class AuthService {
       // Format the profile based on user type - remove sensitive and unnecessary fields
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, _id, createdAt, updatedAt, ...safeUserData } = userProfile;
-      
+
       // Use the helper method to filter fields based on user type
       // This ensures only appropriate fields for the user type are included
       const formattedProfile = this.filterProfileByUserType(userProfile, userProfile.userType);
-      
+
       // Add role from token to the profile
       formattedProfile.role = payload.Role;
 
@@ -236,7 +236,7 @@ export class AuthService {
 
       // Use our helper method to filter profile fields based on user type
       const formattedProfile = this.filterProfileByUserType(rawProfile, rawProfile.userType);
-      
+
       // Add ID as a string to make it easier to work with in the frontend
       formattedProfile.id = rawProfile._id.toString();
 
@@ -281,6 +281,36 @@ export class AuthService {
     }
   }
 
+
+  async getUserForSessionValidation(email: string, name: string) {
+    try {
+      const db = this.client.db();
+      const usersCollection = db.collection('users');
+
+      // Find user by email and name
+      const user = await usersCollection.findOne({
+        email: email,
+        name: name,
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      // Return basic user info for session validation
+      return {
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        userType: user.userType,
+        role: user.userType === 'Candidate' ? 'ROLE_CANDIDATE' : 'ROLE_EMPLOYER',
+      };
+    } catch (error) {
+      Logger.error(`Error getting user for session validation: ${error.message}`);
+      return null;
+    }
+  }
+
   /**
    * Filters the user profile fields based on user type
    * @param profile The raw user profile from the database
@@ -295,10 +325,10 @@ export class AuthService {
       phone: profile.phone,
       userType: profile.userType,
     };
-    
+
     // Initialize the formatted profile
     const formattedProfile: Record<string, any> = { ...baseProfile };
-    
+
     if (userType === UserType.Candidate) {
       // Define candidate-specific fields
       const candidateFields = [
@@ -310,24 +340,24 @@ export class AuthService {
         'expectedSalaryRange',
         'resume',
       ];
-      
+
       // Add only candidate-specific fields that exist
       candidateFields.forEach(field => {
         if (profile[field] !== undefined && profile[field] !== null) {
           formattedProfile[field] = profile[field];
         }
       });
-      
+
       // Calculate profile completion
       const requiredFields = candidateFields.filter(f => f !== 'resume'); // Resume might be optional
       const filledFields = requiredFields.filter(
         field => profile[field] !== undefined && profile[field] !== null
       );
-      
+
       formattedProfile.profileCompletionPercentage = Math.round(
         (filledFields.length / requiredFields.length) * 100
       );
-    } 
+    }
     else if (userType === UserType.Employer) {
       // Define employer-specific fields
       const employerFields = [
@@ -338,24 +368,24 @@ export class AuthService {
         'industry',
         'companyLocation',
       ];
-      
+
       // Add only employer-specific fields that exist
       employerFields.forEach(field => {
         if (profile[field] !== undefined && profile[field] !== null) {
           formattedProfile[field] = profile[field];
         }
       });
-      
+
       // Calculate profile completion
       const filledFields = employerFields.filter(
         field => profile[field] !== undefined && profile[field] !== null
       );
-      
+
       formattedProfile.profileCompletionPercentage = Math.round(
         (filledFields.length / employerFields.length) * 100
       );
     }
-    
+
     return formattedProfile;
   }
 }

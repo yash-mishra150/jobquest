@@ -118,6 +118,8 @@ export class AuthController {
 
     return reply.code(200).send({ message: 'Logged out successfully' });
   }
+
+
   @Get('profile')
   async getProfile(@Req() req: FastifyRequest) {
     try {
@@ -173,15 +175,12 @@ export class AuthController {
     }
   }
 
-  /**
-   * Validates the user's session and returns basic profile info
-   * Perfect for checking if a user is logged in when reloading the site
-   * Returns user data without sensitive fields like _id, createdAt, updatedAt
-   */
+  @UseInterceptors(JwtTokenCheckInterceptor)
+  @UseInterceptors(JwtTokenBlackListInterceptor)
   @Get('validate-session')
   async validateSession(@Req() req: FastifyRequest) {
     try {
-      // Get tokens from cookies
+      // Get tokens from cookies (interceptors handle the validation)
       const accessToken = req.cookies?.access_token;
       const refreshToken = req.cookies?.refresh_token;
 
@@ -193,143 +192,42 @@ export class AuthController {
         };
       }
 
-      // Check access token first
+      // Since interceptors handle token validation, we can decode the access token
       let decodedToken;
-      try {
-        if (accessToken) {
+      if (accessToken) {
+        try {
           decodedToken = await this.jwtTokenService.verifyToken(accessToken);
-        } else if (refreshToken) {
-          // If no access token but has refresh token
-          decodedToken = await this.jwtTokenService.verifyToken(refreshToken);
-
-          // Generate new access token from refresh token
-          const { iat, exp, ...payload } = decodedToken;
-          const newAccessToken = await this.jwtTokenService.signToken(
-            payload,
-            '1d',
-          );
-
-          // Return the new access token with the response
+        } catch (error) {
+          // Token might be expired, but interceptor handles refresh
           return {
-            isValid: true,
-            user: {
-              email: decodedToken.email,
-              name: decodedToken.name,
-              phone: decodedToken.phone,
-              role: decodedToken.Role,
-            },
-            newAccessToken,
+            isValid: false,
+            message: 'Session validation failed',
           };
         }
-      } catch (error) {
-        return {
-          isValid: false,
-          message: 'Invalid or expired tokens',
-        };
       }
 
-      // If we have a valid token, return basic user info
-      if (decodedToken) {
-        return {
-          isValid: true,
-          user: {
-            email: decodedToken.email,
-            name: decodedToken.name,
-            phone: decodedToken.phone,
-            role: decodedToken.Role,
-          },
-        };
+      // Get user info from database using email and name
+      if (decodedToken && decodedToken.email && decodedToken.name) {
+        const userInfo = await this.authservice.getUserForSessionValidation(
+          decodedToken.email,
+          decodedToken.name,
+        );
+
+        if (userInfo) {
+          return {
+            isValid: true,
+            role: userInfo.role,
+            userType: userInfo.userType,
+          };
+        }
       }
 
       return {
         isValid: false,
-        message: 'Invalid session',
+        message: 'User not found',
       };
     } catch (error) {
       Logger.error(`Session validation error: ${error.message}`);
-      return {
-        isValid: false,
-        message: 'Error validating session',
-      };
-    }
-  }
-
-  /**
-   * Fix for validateSession to handle undefined tokens
-   */
-  @Get('validate-session-fixed')
-  async validateSessionFixed(@Req() req: FastifyRequest) {
-    try {
-      // Get tokens from cookies
-      const accessToken = req.cookies?.access_token;
-      const refreshToken = req.cookies?.refresh_token;
-
-      // If no tokens, user is not logged in
-      if (!accessToken && !refreshToken) {
-        return {
-          isValid: false,
-          message: 'No authentication tokens found',
-        };
-      }
-
-      // Check access token first
-      let decodedToken: any;
-      try {
-        if (accessToken) {
-          decodedToken = await this.jwtTokenService.verifyToken(accessToken);
-        } else if (refreshToken) {
-          // If no access token but has refresh token
-          decodedToken = await this.jwtTokenService.verifyToken(refreshToken);
-
-          // Generate new access token from refresh token
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { iat, exp, ...payload } = decodedToken;
-          const newAccessToken = await this.jwtTokenService.signToken(
-            payload,
-            '1d',
-          );
-
-          // Return the new access token with the response
-          return {
-            isValid: true,
-            user: {
-              email: decodedToken.email,
-              name: decodedToken.name,
-              phone: decodedToken.phone,
-              role: decodedToken.Role,
-            },
-            newAccessToken,
-          };
-        }
-      } catch (err) {
-        // Token validation failed
-        return {
-          isValid: false,
-          message: 'Invalid or expired tokens',
-        };
-      }
-
-      // If we have a valid token, return basic user info
-      if (decodedToken) {
-        return {
-          isValid: true,
-          user: {
-            email: decodedToken.email,
-            name: decodedToken.name,
-            phone: decodedToken.phone,
-            role: decodedToken.Role,
-          },
-        };
-      }
-
-      return {
-        isValid: false,
-        message: 'Invalid session',
-      };
-    } catch (err) {
-      Logger.error(
-        `Session validation error: ${err instanceof Error ? err.message : 'Unknown error'}`,
-      );
       return {
         isValid: false,
         message: 'Error validating session',
