@@ -77,16 +77,138 @@ export class AuthController {
           : result.userType === 'Employer'
             ? 'ROLE_EMPLOYER'
             : '',
+      name: result.name,
+      userType: result.userType,
     });
   }
 
   @Post('register')
   async registerUser(@Body() userdto: RegisterUserDto): Promise<any> {
-    const result = await this.authservice.registerUser(userdto);
+    try {
+      Logger.log(
+        `Registration attempt for: ${userdto.email} (${userdto.userType})`,
+      );
 
-    return {
-      message: 'User registered successfully',
-    };
+      const result = await this.authservice.registerUser(userdto);
+
+      Logger.log(`Registration successful for: ${userdto.email}`);
+
+      return {
+        success: true,
+        message: 'User registered successfully',
+      };
+    } catch (error) {
+      Logger.error(`Registration error for ${userdto.email}: ${error.message}`);
+      Logger.error(`Full error: ${JSON.stringify(error)}`);
+
+      return {
+        success: false,
+        message: error.message || 'Registration failed',
+        error: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      };
+    }
+  }
+
+  /**
+   * Test endpoint to check registration data validation
+   */
+  @Post('test-register')
+  async testRegister(@Body() userdto: RegisterUserDto): Promise<any> {
+    try {
+      Logger.log(
+        'Test register data received:',
+        JSON.stringify(userdto, null, 2),
+      );
+
+      // Basic validation
+      if (!userdto.email) {
+        return { success: false, message: 'Email is required' };
+      }
+      if (!userdto.password) {
+        return { success: false, message: 'Password is required' };
+      }
+      if (!userdto.name) {
+        return { success: false, message: 'Name is required' };
+      }
+      if (!userdto.phone) {
+        return { success: false, message: 'Phone is required' };
+      }
+      if (!userdto.userType) {
+        return { success: false, message: 'UserType is required' };
+      }
+
+      return {
+        success: true,
+        message: 'Registration data is valid',
+        receivedData: {
+          email: userdto.email,
+          name: userdto.name,
+          phone: userdto.phone,
+          userType: userdto.userType,
+          hasPassword: !!userdto.password,
+        },
+      };
+    } catch (error) {
+      Logger.error(`Test register error: ${error.message}`);
+      return {
+        success: false,
+        message: 'Test register failed',
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Debug endpoint to test database connection and registration process
+   */
+  @Post('debug-register')
+  async debugRegister(@Body() userdto: RegisterUserDto): Promise<any> {
+    try {
+      Logger.log(
+        'Debug register attempt:',
+        JSON.stringify({
+          email: userdto.email,
+          userType: userdto.userType,
+          hasPassword: !!userdto.password,
+          hasName: !!userdto.name,
+          hasPhone: !!userdto.phone,
+        }),
+      );
+
+      // Test database connection first
+      try {
+        await this.authservice.testDatabaseConnection();
+        Logger.log('Database connection successful');
+      } catch (dbError) {
+        Logger.error('Database connection failed:', dbError);
+        return {
+          success: false,
+          message: 'Database connection failed',
+          error: dbError.message,
+        };
+      }
+
+      // Test the actual registration
+      const result = await this.authservice.registerUser(userdto);
+
+      Logger.log('Debug registration successful');
+      return {
+        success: true,
+        message: 'Debug registration successful',
+        userId: result.id,
+      };
+    } catch (error) {
+      Logger.error('Debug register error:', error);
+      return {
+        success: false,
+        message: 'Debug registration failed',
+        error: {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+        },
+      };
+    }
   }
 
   @Post('logout')
@@ -118,7 +240,6 @@ export class AuthController {
 
     return reply.code(200).send({ message: 'Logged out successfully' });
   }
-
 
   @Get('profile')
   async getProfile(@Req() req: FastifyRequest) {
@@ -218,6 +339,7 @@ export class AuthController {
             isValid: true,
             role: userInfo.role,
             userType: userInfo.userType,
+            name: userInfo.name,
           };
         }
       }

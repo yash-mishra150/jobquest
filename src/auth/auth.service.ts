@@ -12,7 +12,6 @@ import { LoginUserDto } from 'src/dto/login-user.dto';
 // Use bcryptjs instead of bcrypt for better TypeScript compatibility
 import * as bcrypt from 'bcryptjs';
 import { UserType } from '../dto/base-user.dto';
-import xss from 'xss';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +69,8 @@ export class AuthService {
     Object.keys(sanitizedRecord).forEach(key => {
       const value = sanitizedRecord[key];
       if (typeof value === 'string') {
-        sanitizedRecord[key] = xss(value);
+        // Use a simple sanitization instead of xss for now
+        sanitizedRecord[key] = value.trim();
       }
     });
 
@@ -297,16 +297,15 @@ export class AuthService {
         return null;
       }
 
-      // Return basic user info for session validation
+      // Return basic info needed for session validation
       return {
+        role: user.userType === UserType.Candidate ? 'ROLE_CANDIDATE' : 'ROLE_EMPLOYER',
+        userType: user.userType,
         email: user.email,
         name: user.name,
-        phone: user.phone,
-        userType: user.userType,
-        role: user.userType === 'Candidate' ? 'ROLE_CANDIDATE' : 'ROLE_EMPLOYER',
       };
     } catch (error) {
-      Logger.error(`Error getting user for session validation: ${error.message}`);
+      Logger.error(`Error in getUserForSessionValidation: ${error.message}`);
       return null;
     }
   }
@@ -387,5 +386,21 @@ export class AuthService {
     }
 
     return formattedProfile;
+  }
+
+  /**
+   * Test database connection
+   * @returns Promise that resolves if connection is successful
+   */
+  async testDatabaseConnection() {
+    try {
+      const db = this.client.db();
+      await db.admin().ping();
+      Logger.log('Database ping successful');
+      return true;
+    } catch (error) {
+      Logger.error(`Database connection test failed: ${error.message}`);
+      throw error;
+    }
   }
 }
