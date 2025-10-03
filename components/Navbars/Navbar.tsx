@@ -25,7 +25,7 @@ import { Menu, Lock, LogOut, User, Facebook, Twitter, Instagram } from "lucide-r
 import Image from "next/image";
 import Link from "next/link";
 import { RootState } from "@/redux/store";
-import { logout } from "@/redux/slices/AuthSlice";
+import { logout } from "@/redux/features/AuthSlice";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -37,12 +37,12 @@ const Tabs = [
   { name: "Contact", href: "/contactus" },
 ];
 
-const specialTabs = [/^\/jobs\/[^/]+$/];
+const specialTabs = [/^\/jobs\/[^/]+$/, /^\/profile$/];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const dispatch = useDispatch();
-  const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+  const { isLoggedIn, user, userName } = useSelector((state: RootState) => state.auth);
   const pathname = usePathname();
   const isSpecialTab = specialTabs.some((regex) => regex.test(pathname));
 
@@ -148,12 +148,12 @@ const Navbar = () => {
                         src={user?.avatarUrl || ""}
                         alt="User avatar"
                       />
-                      <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
+                      <AvatarFallback>{userName?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.name || "User"}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{userName || "User"}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
@@ -173,7 +173,7 @@ const Navbar = () => {
                   className="bg-[#7367F0] text-white poppins hover:bg-[#3b8791]"
                   asChild
                 >
-                  <Link href="/signup"><Lock className="mr-1 h-4 w-4" /> Log In</Link>
+                  <Link href="/login"><Lock className="mr-1 h-4 w-4" /> Log In</Link>
                 </Button>
               </div>
             )}

@@ -5,9 +5,8 @@ import EmailEnter from '@/components/SignupFlow/EmailEnter';
 import SignUpMain from '@/components/SignUpMain';
 import * as React from 'react';
 
-interface pageProps {}
 
-const Page = ({}: pageProps) => {
+const Page = () => {
   const [choice, setChoice] = React.useState<'email' | 'step'>('email');
 
   const renderStep = () => {

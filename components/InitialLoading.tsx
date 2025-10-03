@@ -4,9 +4,8 @@ import * as React from 'react';
 import { Helix } from 'ldrs/react';
 import 'ldrs/react/Helix.css';
 
-interface InitialLoadingProps {}
 
-const InitialLoading = ({}: InitialLoadingProps) => {
+const InitialLoading = () => {
     const [dots, setDots] = React.useState('');
 
     React.useEffect(() => {

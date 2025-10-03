@@ -49,7 +49,7 @@ const Footer = ({}: FooterProps) => {
   ];
   const pathname = usePathname();
 
-  const specialTabs = [/^\/jobs\/[^/]+$/];
+  const specialTabs = [/^\/jobs\/[^/]+$/, /^\/profile/];
 
   if (pathname === "/login" || pathname === "/signup") {
     return null;

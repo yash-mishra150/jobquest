@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import signupFlowReducer from './slices/signupFlowSlice';
-import authReducer from './slices/AuthSlice';
+import authReducer from './features/AuthSlice';
+import loadingReducer from './features/Loading';
 
 export const store = configureStore({
   reducer: {
     signupFlow: signupFlowReducer,
     auth: authReducer,
+    loading: loadingReducer,
   },
 });
 

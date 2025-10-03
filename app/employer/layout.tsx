@@ -1,7 +1,31 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins, Roboto } from "next/font/google";
 import "../globals.css";
 import Sidebar from "@/components/Sidebar/Sidebar";
+import { SidebarProvider } from "@/components/Sidebar/Sidebar";
+import { Geist, Geist_Mono, Poppins, Roboto } from "next/font/google";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  // weight: ["400", "500", "700"], // common weights, adjust if needed
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,10 +38,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={``}>
-      <body className="antialiased" style={{ display: "flex", minHeight: "100svh" }}>
-        <Sidebar />
-        {children}
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${roboto.variable}`}>
+      <body className="antialiased min-h-[100svh]">
+        <SidebarProvider>
+          <div className="fixed top-0 left-0 h-[100svh] z-40">
+            <Sidebar />
+          </div>
+          <main className="pt-8 lg:pt-0 bg-gray-100 lg:ml-[227px] xl:ml-[300px] min-h-[100svh]">
+            {children}
+          </main>
+        </SidebarProvider>
       </body>
     </html>
   );

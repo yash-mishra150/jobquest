@@ -17,7 +17,13 @@ import {
   Star,
   Heart,
 } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -125,7 +131,7 @@ const featuredJobs = [
     fullTime: true,
     jobsAvailable: 18,
     // logo: "/logos/mynte.png",
-  }, 
+  },
   {
     title: "Financial Advisor",
     company: "Voonder",
@@ -196,12 +202,14 @@ function Clients() {
         Testimonials that Showcase our Exceptional Service and Dedication
       </motion.p>
 
-      
       <div className="relative w-full max-w-8xl">
         <Carousel>
           <CarouselContent>
             {testimonials.map((t, idx) => (
-              <CarouselItem key={idx} className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 flex flex-col items-center min-w-[260px] max-w-full">
+              <CarouselItem
+                key={idx}
+                className="basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/3 xl:basis-1/4 flex flex-col items-center min-w-[260px] max-w-full"
+              >
                 <motion.div
                   initial="hidden"
                   animate="visible"
@@ -214,27 +222,46 @@ function Clients() {
                     <div className="absolute left-1/2 -translate-x-1/2 z-30">
                       <Avatar className="w-20 h-20 border-4 border-[#6c3ebf] bg-white">
                         <AvatarImage asChild>
-                          <Image src={t.avatar} alt={t.name} width={80} height={80} className="rounded-full object-cover" />
+                          <Image
+                            src={t.avatar}
+                            alt={t.name}
+                            width={80}
+                            height={80}
+                            className="rounded-full object-cover"
+                          />
                         </AvatarImage>
                         <AvatarFallback className="w-20 h-20 flex items-center justify-center rounded-full text-[#6c3ebf] bg-white text-2xl font-bold">
-                          {t.name.split(" ")[0][0]}{t.name.split(" ")[1] ? t.name.split(" ")[1][0] : ""}
+                          {t.name.split(" ")[0][0]}
+                          {t.name.split(" ")[1] ? t.name.split(" ")[1][0] : ""}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                     {/* Card with extra top padding for avatar overlap */}
                     <div className="bg-[#232b3b] rounded-2xl pt-14 pb-6 px-8 mt-10 w-full h-full flex flex-col justify-between min-h-[260px] max-h-[320px] sm:min-h-[280px] sm:max-h-[340px] md:min-h-[300px] md:max-h-[360px] lg:min-h-[320px] lg:max-h-[380px] xl:min-h-[340px] xl:max-h-[400px] max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
                       <div>
-                        <div className="font-bold text-white text-lg mb-2">Thank you</div>
+                        <div className="font-bold text-white text-lg mb-2">
+                          Thank you
+                        </div>
                         <div className="flex gap-1 mb-2">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={18} className="text-orange-500 fill-orange-500" />
+                            <Star
+                              key={i}
+                              size={18}
+                              className="text-orange-500 fill-orange-500"
+                            />
                           ))}
                         </div>
-                        <div className="text-base text-neutral-300 mb-4 leading-relaxed">{t.text}</div>
+                        <div className="text-base text-neutral-300 mb-4 leading-relaxed">
+                          {t.text}
+                        </div>
                       </div>
                       <div>
-                        <div className="font-bold text-white text-base">{t.name}</div>
-                        <div className="text-[#a78bfa] text-sm mt-1">{t.role}</div>
+                        <div className="font-bold text-white text-base">
+                          {t.name}
+                        </div>
+                        <div className="text-[#a78bfa] text-sm mt-1">
+                          {t.role}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -245,15 +272,27 @@ function Clients() {
           {/* Dots */}
           <div className="flex justify-center items-center mt-6 gap-1">
             {testimonials.map((_, idx) => (
-              <span key={idx} className="w-2 h-2 rounded-full bg-white/40 inline-block" />
+              <span
+                key={idx}
+                className="w-2 h-2 rounded-full bg-white/40 inline-block"
+              />
             ))}
           </div>
           <div className="absolute right-20 bottom-8 z-30">
-            <Button variant='default' className="absolute top-1/2 -translate-y-1/2 p-0 m-0 bg-transparent border-none outline-none cursor-pointer">
-              <CarouselPrevious variant='default' className="w-12 h-12 rounded-r-sm rounded- bg-white hover:bg-slate-100 text-[#a78bfa]" />
+            <Button
+              variant="default"
+              className="absolute top-1/2 -translate-y-1/2 p-0 m-0 bg-transparent border-none outline-none cursor-pointer"
+            >
+              <CarouselPrevious
+                variant="default"
+                className="w-12 h-12 rounded-r-sm rounded- bg-white hover:bg-slate-100 text-[#a78bfa]"
+              />
             </Button>
             <Button className="absolute top-1/2 -translate-y-1/2 p-0 m-0 bg-transparent border-none outline-none cursor-pointer">
-              <CarouselNext variant='default' className="w-12 h-12 rounded-l bg-white hover:bg-slate-100 text-[#a78bfa]" />
+              <CarouselNext
+                variant="default"
+                className="w-12 h-12 rounded-l bg-white hover:bg-slate-100 text-[#a78bfa]"
+              />
             </Button>
           </div>
         </Carousel>
@@ -263,7 +302,9 @@ function Clients() {
 }
 
 function FeaturedJobs() {
-  const [liked, setLiked] = React.useState(Array(featuredJobs.length).fill(false));
+  const [liked, setLiked] = React.useState(
+    Array(featuredJobs.length).fill(false)
+  );
   const handleLike = (idx: number) => {
     setLiked((prev) => {
       const updated = [...prev];
@@ -294,11 +335,19 @@ function FeaturedJobs() {
       </div>
       <div className="mx-auto max-w-7xl mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         {featuredJobs.map((job, idx) => (
-          <div key={idx} className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full">
+          <div
+            key={idx}
+            className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full"
+          >
             <div className="flex items-center gap-3 flex-wrap">
               <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white shrink-0">
                 {job.logo ? (
-                  <Image src={job.logo} alt={job.company} width={40} height={40} />
+                  <Image
+                    src={job.logo}
+                    alt={job.company}
+                    width={40}
+                    height={40}
+                  />
                 ) : (
                   <Avatar className="w-12 h-12 bg-[#ece9fe]">
                     <AvatarFallback className="w-12 h-12 flex items-center justify-center rounded-lg text-[#7367F0] bg-[#ece9fe] text-xl font-bold">
@@ -308,12 +357,24 @@ function FeaturedJobs() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-lg text-gray-900 group-hover:text-white truncate">{job.title}</div>
-                <div className="text-sm text-gray-500 group-hover:text-white truncate">by {job.company} in <span className="text-[#7367F0] group-hover:text-[#c4b5fd]">{job.type}</span></div>
+                <div className="font-bold text-lg text-gray-900 group-hover:text-white truncate">
+                  {job.title}
+                </div>
+                <div className="text-sm text-gray-500 group-hover:text-white truncate">
+                  by {job.company} in{" "}
+                  <span className="text-[#7367F0] group-hover:text-[#c4b5fd]">
+                    {job.type}
+                  </span>
+                </div>
               </div>
               <div className="ml-auto flex gap-2 items-center">
                 <span className="text-orange-400">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02A11.001 11.001 0 0 0 13 2.05ZM11 2.05A11.001 11.001 0 0 0 2.05 13h4.02A7.001 7.001 0 0 1 11 6.07V2.05ZM2.05 11A11.001 11.001 0 0 0 13 21.95v-4.02a7.001 7.001 0 0 1-6.93-6.93H2.05ZM21.95 13A11.001 11.001 0 0 0 13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02Z"></path></svg>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02A11.001 11.001 0 0 0 13 2.05ZM11 2.05A11.001 11.001 0 0 0 2.05 13h4.02A7.001 7.001 0 0 1 11 6.07V2.05ZM2.05 11A11.001 11.001 0 0 0 13 21.95v-4.02a7.001 7.001 0 0 1-6.93-6.93H2.05ZM21.95 13A11.001 11.001 0 0 0 13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02Z"
+                    ></path>
+                  </svg>
                 </span>
                 <motion.span
                   whileHover={{ scale: 1.2 }}
@@ -325,16 +386,31 @@ function FeaturedJobs() {
                     size={28}
                     stroke={liked[idx] ? "#fff" : "#7367F0"}
                     fill={liked[idx] ? "#f472b6" : "none"}
-                    className={`transition-all duration-300 ${liked[idx] ? "group-hover:scale-125" : ""}`}
+                    className={`transition-all duration-300 ${
+                      liked[idx] ? "group-hover:scale-125" : ""
+                    }`}
                   />
                 </motion.span>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap mt-2">
-              {job.remote && <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">Remote</span>}
-              {job.fullTime && <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">Full Time</span>}
+              {job.remote && (
+                <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
+                  Remote
+                </span>
+              )}
+              {job.fullTime && (
+                <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
+                  Full Time
+                </span>
+              )}
               <span className="bg-[#d7fbe8] text-[#3ecf8e] group-hover:bg-[#bbf7d0] group-hover:text-[#166534] px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"></path></svg>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                  <path
+                    fill="currentColor"
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
+                  ></path>
+                </svg>
                 {job.location}
               </span>
             </div>
@@ -358,9 +434,9 @@ const Home = () => {
       transition: { duration: 0.5, delay: i * 0.12 },
     }),
   };
+
   return (
     <div>
-      
       <HeroSection />
       <div className="px-4 py-12 mt-10 sm:px-6 lg:px-30">
         {/* Heading and View All */}
@@ -368,7 +444,15 @@ const Home = () => {
           <motion.div
             initial="hidden"
             animate="visible"
-            variants={{ hidden: { y: 50, opacity: 0, scale: 0.95 }, visible: { y: 0, opacity: 1, scale: 1, transition: { duration: 0.6 } } }}
+            variants={{
+              hidden: { y: 50, opacity: 0, scale: 0.95 },
+              visible: {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                transition: { duration: 0.6 },
+              },
+            }}
             className="text-left"
           >
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">

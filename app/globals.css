@@ -120,6 +120,15 @@
     font-family: var(--font-poppins-sans), sans-serif;
   }
 
+  /* Completely prevent any body overflow manipulation */
+  body,
+  body[style*="overflow"],
+  body[data-scroll-locked] {
+    overflow: auto !important;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
+
   .poppins{
     font-family: var(--font-poppins-sans), sans-serif;
   }
