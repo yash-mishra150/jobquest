@@ -38,12 +38,29 @@ const page = () => {
   const params = useParams();
   const jobName = params.JobName;
 
+  // read selected job details from sessionStorage if present
+  const [remoteJob, setRemoteJob] = React.useState<any | null>(null);
+
+  React.useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('selectedJob');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setRemoteJob(parsed);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
   const imageVariants = {
     hidden: { scale: 0.95, opacity: 0 },
     visible: { scale: 1, opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
   };
 
   const logoSrc = "/logos/blognation.png";
+
+  const show = remoteJob || jobData;
 
   return (
     <div className="bg-white min-h-screen pt-24">
@@ -69,11 +86,11 @@ const page = () => {
             className="absolute left-4 md:left-8 bottom-[-2.5rem]"
           >
             <div className="w-20 h-20 rounded-2xl bg-white shadow flex items-center justify-center">
-              {jobData.logo ? (
-                <Image src={jobData.logo} alt={jobData.companyName} width={64} height={64} className="w-full h-full object-contain rounded-2xl" />
+              {show.logo ? (
+                <Image src={show.logo} alt={show.companyName || show.company} width={64} height={64} className="w-full h-full object-contain rounded-2xl" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center rounded-2xl bg-[#ece9fe]">
-                  <span className="text-[#7367F0] text-2xl font-bold">{jobData.companyName.charAt(0)}</span>
+                  <span className="text-[#7367F0] text-2xl font-bold">{(show.companyName || show.company || 'U').charAt(0)}</span>
                 </div>
               )}
             </div>
@@ -90,15 +107,15 @@ const page = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:gap-6 w-full">
             <div className="flex-1">
-              <Label className="text-[#7367F0] font-semibold text-base mb-1">{jobData.companyName}</Label>
-              <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-900 leading-normal mb-1">Nuclear Power Engineer</h1>
+              <Label className="text-[#7367F0] font-semibold text-base mb-1">{show.companyName || show.company || ''}</Label>
+              <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-900 leading-normal mb-1">{show.title || 'Job Details'}</h1>
               <div className="flex items-center gap-2 text-gray-500 text-base">
                 <MapPin size={18} />
-                {jobData.location}
+                {show.location}
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm mt-2">
                 <CalendarDays size={16} />
-                {new Date(jobData.timestamp).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                {new Date(show.timestamp || show.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
               </div>
             </div>
             <div className="flex gap-3 items-center mt-4 md:mt-0">
@@ -118,12 +135,12 @@ const page = () => {
             <div className="flex-1">
               <div className="">
                 <Label className="font-bold text-lg mb-2">Overview</Label>
-                <p className="text-gray-700 leading-relaxed mt-2">{jobData.aboutCompany}</p>
+                <p className="text-gray-700 leading-relaxed mt-2">{show.aboutCompany || show.companyDescription || ''}</p>
               </div>
               <div className="mt-8">
                 <Label className="font-bold text-lg mb-2">Responsibilities</Label>
                 <ul className="list-disc pl-6 text-gray-700 space-y-2 mt-2">
-                  {jobData.jobDescription.split("\n").map((line, idx) => (
+                  {(show.jobDescription || show.description || '').toString().split("\n").map((line: string, idx: number) => (
                     line.trim() && <li key={idx}>{line.replace(/^[0-9]+\. /, "")}</li>
                   ))}
                 </ul>
@@ -131,14 +148,14 @@ const page = () => {
               <div className="mt-8">
                 <Label className="font-bold text-lg mb-2">Skills</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {jobData.skills.map((skill) => (
+                  {(show.skills || show.skillsList || []).map((skill: string) => (
                     <Badge key={skill} className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium">{skill}</Badge>
                   ))}
                 </div>
               </div>
               <div className="mt-8">
-                <Label className="font-bold text-lg mb-2">Number of Openings</Label>
-                <div className="text-gray-700 text-base font-semibold mt-2">{jobData.numberOfOpenings}</div>
+                <Label className="font-bold text-lg mb-2">Experience</Label>
+                <div className="text-gray-700 text-base font-semibold mt-2">{show.experience || show.experienceRange || show.experience_required || ''}</div>
               </div>
             </div>
             <motion.div
@@ -150,18 +167,18 @@ const page = () => {
               <div className="mb-6">
                 <Label className="font-bold text-lg mb-2">Job Details</Label>
                 <div className="flex flex-col gap-2 text-gray-700 text-base">
-                  <div><span className="font-semibold">Duration:</span> {jobData.duration}</div>
-                  <div><span className="font-semibold">Stipend:</span> {jobData.stipend}</div>
-                  <div><span className="font-semibold">Employment Type:</span> Internship</div>
-                  <div><span className="font-semibold">Posted:</span> {new Date(jobData.timestamp).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
+                  <div><span className="font-semibold">Duration:</span> {show.duration || ''}</div>
+                  <div><span className="font-semibold">Stipend:</span> {show.stipend || show.salary || ''}</div>
+                  <div><span className="font-semibold">Employment Type:</span> {show.jobType || ''}</div>
+                  <div><span className="font-semibold">Posted:</span> {new Date(show.timestamp || show.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
                 </div>
               </div>
               <div>
                 <Label className="font-bold text-lg mb-2">Company Info</Label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="font-semibold text-[#7367F0]">{jobData.companyName}</div>
+                  <div className="font-semibold text-[#7367F0]">{show.companyName || show.company}</div>
                 </div>
-                <div className="text-gray-700 text-base">{jobData.aboutCompany}</div>
+                <div className="text-gray-700 text-base">{show.aboutCompany || show.companyDescription || ''}</div>
               </div>
             </motion.div>
           </div>

@@ -100,69 +100,7 @@ const testimonials = [
   },
 ];
 
-// Featured jobs data
-const featuredJobs = [
-  {
-    title: "Nuclear Power Engineer",
-    company: "Yata",
-    type: "Residential",
-    location: "Pereira",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    logo: "/images/profile/user-1.png",
-  },
-  {
-    title: "Technical Writer",
-    company: "Blognation",
-    type: "Residential",
-    location: "Solna",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    // logo: "/logos/blognation.png",
-  },
-  {
-    title: "Professor",
-    company: "Mynte",
-    type: "Residential",
-    location: "Minchinabad",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    // logo: "/logos/mynte.png",
-  },
-  {
-    title: "Financial Advisor",
-    company: "Voonder",
-    type: "Residential",
-    location: "Obrenovac",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    // logo: "/logos/voonder.png",
-  },
-  {
-    title: "Associate Professor",
-    company: "Abata",
-    type: "Residential",
-    location: "Thị Trấn Nho Quan",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    // logo: "/logos/abata.png",
-  },
-  {
-    title: "GIS Technical Architect",
-    company: "Linktype",
-    type: "Residential",
-    location: "Velká nad Veličkou",
-    remote: true,
-    fullTime: true,
-    jobsAvailable: 18,
-    // logo: "/logos/linktype.png",
-  },
-];
+// Featured jobs are fetched from server API
 
 function Clients() {
   const headingVariants = {
@@ -302,9 +240,38 @@ function Clients() {
 }
 
 function FeaturedJobs() {
-  const [liked, setLiked] = React.useState(
-    Array(featuredJobs.length).fill(false)
-  );
+  const [featured, setFeatured] = React.useState<any[]>([]);
+  const [liked, setLiked] = React.useState<boolean[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+    fetch('/api/jobs/featured')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return;
+        // support multiple shapes: { data: [...]} or array directly
+        const items = Array.isArray(data) ? data : data.data || data.results || [];
+        setFeatured(items);
+        setLiked(Array(items.length).fill(false));
+      })
+      .catch((e) => {
+        console.error(e);
+        if (!mounted) return;
+        setError('Failed to load featured jobs');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleLike = (idx: number) => {
     setLiked((prev) => {
       const updated = [...prev];
@@ -334,7 +301,14 @@ function FeaturedJobs() {
         </Button>
       </div>
       <div className="mx-auto max-w-7xl mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-        {featuredJobs.map((job, idx) => (
+        {loading ? (
+          <div className="col-span-full text-center text-gray-500">Loading featured jobs…</div>
+        ) : error ? (
+          <div className="col-span-full text-center text-red-500">{error}</div>
+        ) : featured.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500">No featured jobs found.</div>
+        ) : (
+          featured.map((job: any, idx: number) => (
           <div
             key={idx}
             className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full"
@@ -418,7 +392,8 @@ function FeaturedJobs() {
               {job.jobsAvailable} Jobs Available
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

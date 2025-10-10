@@ -28,49 +28,80 @@ const JobCard: React.FC<JobCardProps> = ({
   editMode = false,
   OnEdit,
 }) => {
+
+  // generate a deterministic background color from a string
+  const stringToHsl = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash) % 360; // hue
+    const s = 60 + (Math.abs(hash) % 20); // saturation
+    const l = 65; // lightness
+    return `hsl(${h} ${s}% ${l}%)`;
+  };
+
+  const displaySalary = (sal?: string) => {
+    if (!sal) return undefined;
+    const lower = sal.toLowerCase();
+    if (lower.includes('as per industry') || lower.includes('as per company') || lower.includes('not disclosed')) {
+      return 'Not disclosed';
+    }
+    return sal;
+  };
   return (
     <button
       type="button"
       onClick={onApply}
-      className="group bg-white rounded-2xl p-6 shadow flex flex-col justify-between min-h-[220px] max-w-full w-full text-left transition-colors duration-200 hover:bg-[#7367F0] focus:outline-none"
+      className="group bg-white rounded-2xl p-6 shadow flex flex-col justify-between h-[250px] max-w-full w-full text-left transition-colors duration-200 hover:bg-[#7367F0] focus:outline-none overflow-hidden"
     >
       <div className="flex justify-between">
         <div className="flex items-center gap-3 hover:text-white">
-          <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white shrink-0">
-            {logo ? (
-              <Image src={logo} alt={company} width={40} height={40} />
-            ) : (
-              <Avatar className="w-12 h-12 bg-[#ece9fe]">
-                <AvatarFallback className="w-12 h-12 flex items-center justify-center rounded-lg text-[#7367F0] bg-[#ece9fe] text-xl font-bold">
-                  {company.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            )}
+          {/* always use initial instead of logo to keep UI consistent */}
+          <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+            <div
+              aria-hidden
+              className="w-12 h-12 flex items-center justify-center rounded-md text-white font-bold"
+              style={{ background: stringToHsl(company || 'U') }}
+            >
+              <span className="text-base sm:text-lg leading-none">{(company || 'U').charAt(0).toUpperCase()}</span>
+            </div>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-bold text-lg text-gray-900 truncate group-hover:text-white">
+            <div
+              className="font-bold text-base sm:text-lg text-gray-900 group-hover:text-white"
+              style={{
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+              title={title}
+            >
               {title}
             </div>
-            <div className="text-sm text-gray-500 truncate group-hover:text-white">
+            <div
+              className="text-xs sm:text-sm text-gray-500 group-hover:text-white mt-0.5"
+              style={{
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+              title={`${company} • ${location}`}
+            >
               {company} <span className="mx-1">•</span> {location}
             </div>
           </div>
         </div>
-        {posted && (
-          <span className="text-xs text-gray-400 flex items-center gap-1 group-hover:text-white">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M12 8v4l3 1" />
-            </svg>
-            {posted}
-          </span>
-        )}
+        {/* posted/date removed to keep card sizes consistent */}
       </div>
       <div className="flex justify-between items-center mt-2">
         <div className="flex flex-wrap gap-2 max-w-[65%]">
           {tags.slice(0, 4).map((tag, i) => (
             <span
               key={tag + i}
-              className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium group-hover:bg-[#a78bfa] group-hover:text-white whitespace-nowrap"
+              className="bg-[#ece9fe] text-[#7367F0] px-2 py-0.5 rounded-full text-xs font-medium group-hover:bg-[#a78bfa] group-hover:text-white max-w-[40%] truncate"
             >
               {tag}
             </span>
@@ -79,9 +110,9 @@ const JobCard: React.FC<JobCardProps> = ({
             <span className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium group-hover:bg-[#a78bfa] group-hover:text-white whitespace-nowrap">more...</span>
           )}
         </div>
-        {salary && (
-          <span className="text-base text-[#7367F0] font-semibold group-hover:text-white ml-2">
-            {salary}
+        {displaySalary(salary) && (
+          <span className="text-sm sm:text-base text-[#7367F0] font-semibold group-hover:text-white ml-2 truncate">
+            {displaySalary(salary)}
           </span>
         )}
       </div>
