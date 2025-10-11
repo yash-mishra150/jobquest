@@ -148,6 +148,41 @@ const page = () => {
     }
   };
 
+  // fetch featured jobs (when user visits /jobs directly with no query)
+  const fetchFeaturedJobs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/jobs/featured");
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Featured fetch failed: ${res.status} ${text}`);
+      }
+      const data = await res.json();
+      const results = Array.isArray(data) ? data : data.data || data.results || [];
+      const mapped = results.map((item: any) => ({
+        logo:
+          item.logo || item.company_logo || item.logo_url || item.logoUrl || "/images/profile/user-1.png",
+        company:
+          item.company || item.employer || item.company_name || item.companyName || item.source || "Unknown",
+        location: item.location || item.city || item.town || "Remote",
+        title: item.title || item.position || item.job_title || "Untitled",
+        tags: item.tags || item.skills || (item.category ? [item.category] : []) || [],
+        salary: item.salary || item.compensation || undefined,
+        posted: item.posted || item.age || item.posted_at || item.postedDate || undefined,
+        raw: item,
+      }));
+
+      setJobResults(mapped);
+      if (typeof data.total === "number") setTotalCount(data.total);
+    } catch (e: any) {
+      console.error("Failed to load featured jobs", e);
+      setError(e?.message || "Failed to load featured jobs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     await fetchJobs(1); // start search from page 1 using current inputs
@@ -178,6 +213,14 @@ const page = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, location]);
 
+  // If user lands on /jobs with NO query params, load featured jobs
+  React.useEffect(() => {
+    if (!title && !location) {
+      fetchFeaturedJobs();
+    }
+    // run when title/location change so we don't accidentally fetch featured when a search is present
+  }, [title, location]);
+  
   return (
     <div className="bg-[#fafaff] min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-10">
