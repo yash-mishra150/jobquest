@@ -26,7 +26,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/features/AuthSlice";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 const Tabs = [
@@ -34,7 +34,7 @@ const Tabs = [
   { name: "Jobs", href: "/jobs" },
   { name: "Blogs", href: "/blogs" },
   { name: "About", href: "/aboutus" },
-  { name: "Contact", href: "/contactus" },
+  // { name: "Contact", href: "/contactus" },
 ];
 
 const specialTabs = [/^\/jobs\/[^/]+$/, /^\/profile$/];
@@ -44,6 +44,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, user, userName } = useSelector((state: RootState) => state.auth);
   const pathname = usePathname();
+  const router = useRouter();
   const isSpecialTab = specialTabs.some((regex) => regex.test(pathname));
 
   useEffect(() => {
@@ -66,7 +67,24 @@ const Navbar = () => {
   }
 
   const handleLogout = () => {
-    dispatch(logout());
+    // call server logout endpoint to clear cookies, then clear client state and navigate
+    (async () => {
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (e) {
+        console.error("Logout API failed:", e);
+      } finally {
+        dispatch(logout());
+        try {
+          router.push("/");
+        } catch (_) {
+        }
+      }
+    })();
   };
 
   return (

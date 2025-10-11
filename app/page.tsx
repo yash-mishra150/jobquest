@@ -1,6 +1,5 @@
 "use client";
 
-import HeroSection from "@/components/HeroSection";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import * as React from "react";
@@ -27,6 +26,8 @@ import {
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import HeroSection from "@/components/HeroSection";
 
 const CATEGORY_HEADING = "Search by Category";
 
@@ -249,19 +250,20 @@ function FeaturedJobs() {
     let mounted = true;
     setLoading(true);
     setError(null);
-    fetch('/api/jobs/featured')
+    fetch("/api/jobs/featured")
       .then((r) => r.json())
       .then((data) => {
         if (!mounted) return;
-        // support multiple shapes: { data: [...]} or array directly
-        const items = Array.isArray(data) ? data : data.data || data.results || [];
+        const items = Array.isArray(data)
+          ? data
+          : data.data || data.results || [];
         setFeatured(items);
         setLiked(Array(items.length).fill(false));
       })
       .catch((e) => {
         console.error(e);
         if (!mounted) return;
-        setError('Failed to load featured jobs');
+        setError("Failed to load featured jobs");
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -302,97 +304,192 @@ function FeaturedJobs() {
       </div>
       <div className="mx-auto max-w-7xl mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full text-center text-gray-500">Loading featured jobs…</div>
+          // skeleton cards to match featured job layout
+          <>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={`skeleton-${i}`}
+                className="bg-white rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 animate-pulse min-h-[260px]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                  <div className="ml-auto">
+                    <div className="w-8 h-8 bg-gray-200 rounded" />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 flex-wrap mt-2">
+                  <div className="h-6 w-20 bg-gray-200 rounded" />
+                  <div className="h-6 w-20 bg-gray-200 rounded" />
+                  <div className="h-6 w-28 bg-gray-200 rounded" />
+                </div>
+
+                <div className="mt-2 h-4 w-32 bg-gray-200 rounded" />
+
+                <div className="flex gap-2 flex-wrap mt-2">
+                  <div className="h-8 w-20 bg-gray-200 rounded" />
+                  <div className="h-8 w-20 bg-gray-200 rounded" />
+                  <div className="h-8 w-20 bg-gray-200 rounded" />
+                </div>
+              </div>
+            ))}
+          </>
         ) : error ? (
           <div className="col-span-full text-center text-red-500">{error}</div>
         ) : featured.length === 0 ? (
-          <div className="col-span-full text-center text-gray-500">No featured jobs found.</div>
+          <div className="col-span-full text-center text-gray-500">
+            No featured jobs found.
+          </div>
         ) : (
-          featured.map((job: any, idx: number) => (
-          <div
-            key={idx}
-            className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full"
-          >
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white shrink-0">
-                {job.logo ? (
-                  <Image
-                    src={job.logo}
-                    alt={job.company}
-                    width={40}
-                    height={40}
-                  />
-                ) : (
-                  <Avatar className="w-12 h-12 bg-[#ece9fe]">
-                    <AvatarFallback className="w-12 h-12 flex items-center justify-center rounded-lg text-[#7367F0] bg-[#ece9fe] text-xl font-bold">
-                      {job.company.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-lg text-gray-900 group-hover:text-white truncate">
-                  {job.title}
+          featured.map((job: any, idx: number) => {
+            // map incoming API fields to UI-friendly names with fallbacks
+            const title = job.title || job.jobTitle || "Untitled Role";
+            const company =
+              job.companyName ||
+              job.company ||
+              job.recruiter ||
+              "Unknown Company";
+            const location = job.location || job.city || "Not mentioned";
+            const skills = Array.isArray(job.skills)
+              ? job.skills
+              : (job.tags || []).slice(0, 6);
+            const openings =
+              job.numberOfOpenings ||
+              job.numberOf_positions ||
+              job.jobsAvailable ||
+              job.numberOfOpenings ||
+              job.numberOfOpenings === 0
+                ? job.numberOfOpenings
+                : job.numberOfOpenings || job.numberOfOpenings || undefined;
+            const jobType = job.jobType || job.type || job.employmentType || "";
+            const isRemote =
+              /remote/i.test(
+                job.experience || job.location || job.remote || ""
+              ) ||
+              /remote/i.test(job.jobType || "") ||
+              !!job.remote;
+            const isFullTime =
+              /full/i.test(job.jobType || job.employmentType || "") ||
+              !!job.fullTime;
+
+            return (
+              <div
+                key={idx}
+                className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full"
+              >
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white shrink-0">
+                    {job.logo ? (
+                      <Image
+                        src={job.logo}
+                        alt={company}
+                        width={40}
+                        height={40}
+                      />
+                    ) : (
+                      <Avatar className="w-12 h-12 bg-[#ece9fe]">
+                        <AvatarFallback className="w-12 h-12 flex items-center justify-center rounded-lg text-[#7367F0] bg-[#ece9fe] text-xl font-bold">
+                          {company.charAt(0) || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div
+                      title={title}
+                      className="font-bold text-lg text-gray-900 group-hover:text-white truncate"
+                    >
+                      {title}
+                    </div>
+                    <div
+                      title={company + " • " + location}
+                      className="text-sm text-gray-500 group-hover:text-white truncate"
+                    >
+                      by {company} in{" "}
+                      <span className="text-[#7367F0] group-hover:text-[#c4b5fd]">
+                        {jobType || location}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="ml-auto flex gap-2 items-center">
+                    <span className="text-orange-400">
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02A11.001 11.001 0 0 0 13 2.05ZM11 2.05A11.001 11.001 0 0 0 2.05 13h4.02A7.001 7.001 0 0 1 11 6.07V2.05ZM2.05 11A11.001 11.001 0 0 0 13 21.95v-4.02a7.001 7.001 0 0 1-6.93-6.93H2.05ZM21.95 13A11.001 11.001 0 0 0 13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02Z"
+                        ></path>
+                      </svg>
+                    </span>
+                    <motion.span
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="cursor-pointer"
+                      onClick={() => handleLike(idx)}
+                    >
+                      <Heart
+                        size={28}
+                        stroke={liked[idx] ? "#fff" : "#7367F0"}
+                        fill={liked[idx] ? "#f472b6" : "none"}
+                        className={`transition-all duration-300 ${
+                          liked[idx] ? "group-hover:scale-125" : ""
+                        }`}
+                      />
+                    </motion.span>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500 group-hover:text-white truncate">
-                  by {job.company} in{" "}
-                  <span className="text-[#7367F0] group-hover:text-[#c4b5fd]">
-                    {job.type}
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {isRemote && (
+                    <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
+                      Remote
+                    </span>
+                  )}
+                  {isFullTime && (
+                    <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
+                      Full Time
+                    </span>
+                  )}
+                  <span className="bg-[#d7fbe8] text-[#3ecf8e] group-hover:bg-[#bbf7d0] group-hover:text-[#166534] px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                      <path
+                        fill="currentColor"
+                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
+                      ></path>
+                    </svg>
+                    {location}
                   </span>
                 </div>
+                <div className="mt-2 text-[#7367F0] group-hover:text-white text-sm font-semibold">
+                  {openings
+                    ? `${openings} Openings`
+                    : job.numberOfOpenings === "" || job.numberOfOpenings === 0
+                    ? `0 Openings`
+                    : job.jobsAvailable
+                    ? `${job.jobsAvailable} Jobs Available`
+                    : `${job.numberOfOpenings || ""}`}
+                </div>
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {skills &&
+                    skills.slice(0, 4).map((s: string, i: number) => (
+                      <span
+                        key={i}
+                        className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                </div>
               </div>
-              <div className="ml-auto flex gap-2 items-center">
-                <span className="text-orange-400">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02A11.001 11.001 0 0 0 13 2.05ZM11 2.05A11.001 11.001 0 0 0 2.05 13h4.02A7.001 7.001 0 0 1 11 6.07V2.05ZM2.05 11A11.001 11.001 0 0 0 13 21.95v-4.02a7.001 7.001 0 0 1-6.93-6.93H2.05ZM21.95 13A11.001 11.001 0 0 0 13 2.05v4.02a7.001 7.001 0 0 1 6.93 6.93h4.02Z"
-                    ></path>
-                  </svg>
-                </span>
-                <motion.span
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="cursor-pointer"
-                  onClick={() => handleLike(idx)}
-                >
-                  <Heart
-                    size={28}
-                    stroke={liked[idx] ? "#fff" : "#7367F0"}
-                    fill={liked[idx] ? "#f472b6" : "none"}
-                    className={`transition-all duration-300 ${
-                      liked[idx] ? "group-hover:scale-125" : ""
-                    }`}
-                  />
-                </motion.span>
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap mt-2">
-              {job.remote && (
-                <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
-                  Remote
-                </span>
-              )}
-              {job.fullTime && (
-                <span className="bg-[#ece9fe] text-[#7367F0] group-hover:bg-[#a78bfa] group-hover:text-white px-3 py-1 rounded-full text-xs font-medium">
-                  Full Time
-                </span>
-              )}
-              <span className="bg-[#d7fbe8] text-[#3ecf8e] group-hover:bg-[#bbf7d0] group-hover:text-[#166534] px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
-                  ></path>
-                </svg>
-                {job.location}
-              </span>
-            </div>
-            <div className="mt-2 text-[#7367F0] group-hover:text-white text-sm font-semibold">
-              {job.jobsAvailable} Jobs Available
-            </div>
-          </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
@@ -400,6 +497,16 @@ function FeaturedJobs() {
 }
 
 const Home = () => {
+  const router = useRouter();
+
+  // called by HeroSection when user searches (title, location)
+  const handleSearch = (title?: string, location?: string) => {
+    const params = new URLSearchParams();
+    if (title) params.set("title", title);
+    if (location) params.set("location", location);
+    router.push(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
   const categoryVariants = {
     hidden: { y: 40, opacity: 0, scale: 0.95 },
     visible: (i: number) => ({
@@ -412,9 +519,8 @@ const Home = () => {
 
   return (
     <div>
-      <HeroSection />
+      <HeroSection onSearch={handleSearch} />
       <div className="px-4 py-12 mt-10 sm:px-6 lg:px-30">
-        {/* Heading and View All */}
         <div className="mx-auto max-w-7xl flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <motion.div
             initial="hidden"

@@ -50,10 +50,20 @@ const JobCard: React.FC<JobCardProps> = ({
     return sal;
   };
   return (
-    <button
-      type="button"
-      onClick={onApply}
-      className="group bg-white rounded-2xl p-6 shadow flex flex-col justify-between h-[250px] max-w-full w-full text-left transition-colors duration-200 hover:bg-[#7367F0] focus:outline-none overflow-hidden"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        // allow onApply when user clicks the card; interactive children will stop propagation
+        onApply && onApply();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onApply && onApply();
+        }
+      }}
+      className="group bg-white rounded-2xl p-6 shadow flex flex-col justify-between h-[250px] max-w-full w-full text-left transition-colors duration-200 hover:bg-[#7367F0] focus:outline-none overflow-hidden cursor-pointer"
     >
       <div className="flex justify-between">
         <div className="flex items-center gap-3 hover:text-white">
@@ -121,7 +131,10 @@ const JobCard: React.FC<JobCardProps> = ({
           <>
             <Button
               variant="default"
-              onClick={OnEdit}
+              onClick={(e) => {
+                e.stopPropagation();
+                OnEdit && OnEdit();
+              }}
               className="rounded-lg h-10 w-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white flex items-center justify-center gap-2 shadow-none"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
@@ -129,6 +142,7 @@ const JobCard: React.FC<JobCardProps> = ({
             </Button>
             <Button
               variant="outline"
+              onClick={(e) => e.stopPropagation()}
               className="rounded-lg h-10 w-1/2 border-[#7367F0] text-[#7367F0] flex items-center justify-center gap-2 shadow-none"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
@@ -137,7 +151,7 @@ const JobCard: React.FC<JobCardProps> = ({
           </>
         )}
       </div>
-    </button>
+  </div>
   );
 };
 

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'motion/react';
@@ -11,10 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useRouter } from "next/navigation";
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onSearch?: (title?: string, location?: string) => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -35,10 +42,19 @@ const HeroSection: React.FC = () => {
   };
 
   const handleSearch = () => {
-    if (searchQuery && location) {
-      console.log(`Searching for ${searchQuery} in ${location}`);
-      // Implement search logic here
+    // require at least one filter (title or location)
+    if (!searchQuery && !location) return;
+
+    if (onSearch) {
+      onSearch(searchQuery || undefined, location || undefined);
+      return;
     }
+
+    // fallback navigation when no onSearch prop is provided
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("title", searchQuery);
+    if (location) params.set("location", location);
+    router.push(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
   return (
@@ -109,7 +125,7 @@ const HeroSection: React.FC = () => {
           <Button
             onClick={handleSearch}
             className="w-full sm:w-auto bg-[#7367F0] hover:bg-[#A582F7] text-white font-semibold px-6 py-2 rounded-lg"
-            disabled={!searchQuery || !location}
+            disabled={!searchQuery && !location}
           >
             Find Jobs
           </Button>

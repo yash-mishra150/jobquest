@@ -16,7 +16,7 @@ const BaseHeader = () => {
         },
         {
             pathname: "/aboutus",
-            heading: "About Our Company",
+            heading: "About Me",
             subheading: "Learn about our mission, vision, and team driving innovation.",
         },
         {

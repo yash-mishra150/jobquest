@@ -6,22 +6,23 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-
-
 
 const tags = ["App", "Administrative", "Android", "Wordpress", "Design", "React", "Marketing", "Trending"];
 
 const page = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const title = searchParams.get("title") || "";
+  const location = searchParams.get("location") || "";
 
-  // Form / request state for the scrapper payload
-  const [search, setSearch] = React.useState("software developer");
+
+  const [search, setSearch] = React.useState<string>("");
   const [pageNum, setPageNum] = React.useState<number>(1);
-  const [size, setSize] = React.useState<number>(20);
-  const [jobsInput, setJobsInput] = React.useState<string>("Frontend Developer,Backend Developer,Full Stack Developer");
-  const [locationsInput, setLocationsInput] = React.useState<string>("Bangalore,Delhi,Hyderabad");
+  const [size, setSize] = React.useState<number>(8);
+  const [jobsInput, setJobsInput] = React.useState<string>("");
+  const [locationsInput, setLocationsInput] = React.useState<string>(""); 
   const [workFromHome, setWorkFromHome] = React.useState(true);
   const [workFromOffice, setWorkFromOffice] = React.useState(false);
   const [hybrid, setHybrid] = React.useState(true);
@@ -40,19 +41,17 @@ const page = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // responsive skeleton count to fill the grid on different screen sizes
+
   const [skeletonCount, setSkeletonCount] = React.useState<number>(6);
 
   React.useEffect(() => {
     const compute = () => {
       if (typeof window === 'undefined') return;
       const w = window.innerWidth;
-      // Tailwind breakpoints approx: sm=640, md=768, lg=1024
       let cols = 1;
       if (w >= 1024) cols = 3;
       else if (w >= 640) cols = 2;
-      const rows = 3; // show ~3 rows of skeletons
-      // show one fewer skeleton than full grid so it looks less heavy
+      const rows = 3;
       setSkeletonCount(Math.max(1, cols * rows - 1));
     };
     compute();
@@ -60,46 +59,9 @@ const page = () => {
     return () => window.removeEventListener('resize', compute);
   }, []);
 
-  // jobResults holds the list of job items to render. Start empty and load featured jobs on mount
   const [jobResults, setJobResults] = React.useState<any[]>([]);
   const [totalCount, setTotalCount] = React.useState<number | null>(null);
 
-  // fetch featured jobs on mount to populate the page initially
-  React.useEffect(() => {
-    let mounted = true;
-    const load = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/jobs/featured');
-        const data = await res.json();
-        const items = Array.isArray(data) ? data : data.data || data.results || [];
-        const mapped = items.map((item: any) => ({
-          logo: item.logo || item.company_logo || item.logo_url || "/images/profile/user-1.png",
-          company: item.company || item.employer || item.company_name || item.companyName || item.source || "Unknown",
-          location: item.location || item.city || item.town || item.location || "Remote",
-          title: item.title || item.position || item.job_title || "Untitled",
-          tags: item.tags || item.skills || (item.category ? [item.category] : []) || [],
-          salary: item.salary || item.compensation || undefined,
-          posted: item.posted || item.age || item.posted_at || item.postedDate || undefined,
-          raw: item,
-        }));
-
-        if (!mounted) return;
-        setJobResults(mapped);
-        if (typeof data.total === 'number') setTotalCount(data.total);
-      } catch (e) {
-        console.error('Failed to load featured jobs', e);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Helper to build request payload from the form state
   const buildPayload = () => ({
     search,
     page: pageNum,
@@ -122,15 +84,28 @@ const page = () => {
     _skipDescriptions,
   });
 
-  // Submit handler to call the Next.js route
   // generic fetch function which can be used for initial search and for pagination
-  const fetchJobs = async (pageOverride?: number) => {
+  // fetchJobs accepts optional overrides so we can use query params immediately
+  const fetchJobs = async (
+    pageOverride?: number,
+    searchOverride?: string,
+    locationsOverride?: string,
+    jobsOverride?: string
+  ) => {
     const pageToUse = pageOverride ?? pageNum;
     setLoading(true);
     setError(null);
 
     try {
-      const payload = { ...buildPayload(), page: pageToUse };
+      // build payload from state but allow overrides (used when query params populated)
+      const payloadBase = buildPayload();
+      const payload = {
+        ...payloadBase,
+        page: pageToUse,
+        search: searchOverride ?? payloadBase.search,
+        locations: locationsOverride ? (locationsOverride.split(",").map(s => s.trim()).filter(Boolean)) : payloadBase.locations,
+        jobs: jobsOverride ? (jobsOverride.split(",").map(s => s.trim()).filter(Boolean)) : payloadBase.jobs,
+      };
 
       const res = await fetch('/api/jobs/scrapper', {
         method: 'POST',
@@ -175,13 +150,33 @@ const page = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    await fetchJobs(1); // start search from page 1
+    await fetchJobs(1); // start search from page 1 using current inputs
   };
 
   React.useEffect(() => {
     // Optionally, fetch immediately on mount. Comment out if undesired.
     // handleSubmit();
   }, []);
+
+  // when arriving from Home with query params, populate inputs and run search
+  React.useEffect(() => {
+    // only act if title or location present
+    if (!title && !location) return;
+
+    // populate fields: title -> search, location -> locationsInput
+    const qTitle = title || "";
+    const qLocation = location || "";
+
+    setSearch(qTitle);
+    // put the title into jobsInput if you want comma-separated roles (optional),
+    // but keep `search` as the primary single-term filter.
+    // We'll set locationsInput from location param.
+    setLocationsInput(qLocation);
+
+    // perform search immediately using overrides (prevents waiting for state flush)
+    fetchJobs(1, qTitle, qLocation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, location]);
 
   return (
     <div className="bg-[#fafaff] min-h-screen">
@@ -210,7 +205,7 @@ const page = () => {
                   type="text"
                   value={jobsInput}
                   onChange={(e) => setJobsInput(e.target.value)}
-                  placeholder="Frontend Developer, Backend Developer"
+                  placeholder="job tags"
                   disabled={loading}
                   className="w-full h-[5vh] mb-3 px-4 py-0 rounded-[10px] bg-white text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-[#a78bfa] border-none disabled:opacity-60"
                 />

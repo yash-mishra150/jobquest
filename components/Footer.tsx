@@ -45,7 +45,7 @@ const Footer = ({}: FooterProps) => {
     { name: "Jobs", href: "/jobs" },
     { name: "Blogs", href: "/blogs" },
     { name: "About", href: "/aboutus" },
-    { name: "Contact", href: "/contactus" },
+    // { name: "Contact", href: "/contactus" },
   ];
   const pathname = usePathname();
 
