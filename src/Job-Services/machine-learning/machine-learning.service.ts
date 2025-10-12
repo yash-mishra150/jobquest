@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { Logger } from '@nestjs/common';
 import * as FormData from 'form-data';
 import { OpportunityDto } from 'src/dto/Opportunity.dto';
 
@@ -13,15 +14,21 @@ export class MachineLearningService {
 
   async jobVerify(jobDTO: OpportunityDto): Promise<any> {
     try {
-      const response = axios.post(`${this.BaseUrl}/verify-job`, jobDTO, {
+      Logger.log('Job Verification Service Invoked');
+      Logger.log('Base URL:', `${this.BaseUrl}/verify-job`);
+      Logger.log('Job DTO:', jobDTO);
+      const response = await axios.post(`${this.BaseUrl}/verify-job`, jobDTO, {
         headers: {
           'Content-Type': 'Application/json',
           Connection: 'keep-alive',
         },
       });
 
-      return response;
+      Logger.log('Job Verification Service Response:', response.data);
+
+      return response.data;
     } catch (error) {
+      Logger.error('Error in Job Verification Service', error.response.message);
       throw new HttpException(error.response.message, HttpStatus.BAD_REQUEST);
     }
   }

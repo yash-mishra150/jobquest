@@ -24,17 +24,14 @@ export class JwtTokenBlackListInterceptor
 
   async onModuleInit() {
     try {
-      const db = this.client.db(); // default DB or specify here if needed
+      const db = this.client.db();
       this.collection = db.collection('blacklist');
 
-      // Create TTL index on expireAt for automatic deletion
       await this.collection.createIndex(
         { expireAt: 1 },
         { expireAfterSeconds: 0 },
       );
-      // Unique index on token for fast lookup & uniqueness
       await this.collection.createIndex({ token: 1 }, { unique: true });
-      // Index on userId for querying if needed
       await this.collection.createIndex({ userId: 1 });
 
       this.logger.log('Blacklist indexes created successfully.');
@@ -58,11 +55,11 @@ export class JwtTokenBlackListInterceptor
     const req = context.switchToHttp().getRequest<FastifyRequest>();
     const res = context.switchToHttp().getResponse<FastifyReply>();
 
-    // Attempt to get tokens from cookies
     let accessToken = req.cookies?.access_token;
     let refreshToken = req.cookies?.refresh_token;
 
-    // Fallback: parse cookies manually if not found
+    this.logger.debug(req.cookies, 'Cookies from request');
+
     if ((!accessToken || !refreshToken) && req.headers.cookie) {
       const cookieObj: { [key: string]: string } = req.headers.cookie
         .split(';')
@@ -75,7 +72,11 @@ export class JwtTokenBlackListInterceptor
       refreshToken = refreshToken || cookieObj['refresh_token'];
     }
 
-    // Support Bearer tokens from Authorization header as fallback
+    this.logger.debug('Extracted tokens from request', {
+      hasAccessToken: accessToken,
+      hasRefreshToken: refreshToken,
+    });
+
     if (!accessToken && req.headers.authorization?.startsWith('Bearer ')) {
       accessToken = req.headers.authorization.slice(7).trim();
     }
