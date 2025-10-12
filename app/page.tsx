@@ -245,6 +245,17 @@ function FeaturedJobs() {
   const [liked, setLiked] = React.useState<boolean[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const router = useRouter();
+
+  // format potentially multi-location strings like:
+  // "Chandigarh (Punjab), Ambala (Haryana), Panchkula (Haryana)" => "Chandigarh (Punjab) +2"
+  const formatLocation = (loc?: string) => {
+    if (!loc) return "Not mentioned";
+    const parts = loc.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length === 0) return loc;
+    if (parts.length === 1) return parts[0];
+    return `${parts[0]} +${parts.length - 1}`;
+  };
 
   React.useEffect(() => {
     let mounted = true;
@@ -379,7 +390,16 @@ function FeaturedJobs() {
             return (
               <div
                 key={idx}
-                className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full"
+                role="button"
+                onClick={async () => {
+                  try {
+                    sessionStorage.setItem("selectedJob", JSON.stringify(job));
+                  } catch (e) {
+                  }
+                  const slug = encodeURIComponent((title || "").replace(/\s+/g, "-"));
+                  router.push(`/jobs/${slug}`);
+                }}
+                className="bg-white hover:bg-[#7c3aed] transition-colors duration-300 rounded-2xl p-5 sm:p-6 shadow flex flex-col gap-4 group min-h-[260px] max-w-full cursor-pointer"
               >
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-white shrink-0">
@@ -406,12 +426,15 @@ function FeaturedJobs() {
                       {title}
                     </div>
                     <div
-                      title={company + " • " + location}
+                      title={company + " • " + (location || "")}
                       className="text-sm text-gray-500 group-hover:text-white truncate"
                     >
                       by {company} in{" "}
-                      <span className="text-[#7367F0] group-hover:text-[#c4b5fd]">
-                        {jobType || location}
+                      <span
+                        className="text-[#7367F0] group-hover:text-[#c4b5fd]"
+                        title={(location || "")}
+                      >
+                        {jobType || formatLocation(location)}
                       </span>
                     </div>
                   </div>
@@ -433,7 +456,7 @@ function FeaturedJobs() {
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.9 }}
                       className="cursor-pointer"
-                      onClick={() => handleLike(idx)}
+                      onClick={(e: any) => { e.stopPropagation(); handleLike(idx); }}
                     >
                       <Heart
                         size={28}
@@ -464,7 +487,7 @@ function FeaturedJobs() {
                         d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
                       ></path>
                     </svg>
-                    {location}
+                    <span title={location}>{formatLocation(location)}</span>
                   </span>
                 </div>
                 <div className="mt-2 text-[#7367F0] group-hover:text-white text-sm font-semibold">
