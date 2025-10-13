@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 import * as FormData from 'form-data';
-import { OpportunityDto } from 'src/dto/Opportunity.dto';
+import { JobVerificationDto, OpportunityDto } from 'src/dto/Opportunity.dto';
 
 @Injectable()
 export class MachineLearningService {
@@ -12,7 +12,7 @@ export class MachineLearningService {
     this.BaseUrl = process.env.BASE_URL_ML || '';
   }
 
-  async jobVerify(jobDTO: OpportunityDto): Promise<any> {
+  async jobVerify(jobDTO: JobVerificationDto): Promise<any> {
     try {
       Logger.log('Job Verification Service Invoked');
       Logger.log('Base URL:', `${this.BaseUrl}/verify-job`);

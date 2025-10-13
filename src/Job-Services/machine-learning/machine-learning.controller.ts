@@ -7,7 +7,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { MachineLearningService } from './machine-learning.service';
-import { OpportunityDto } from 'src/dto/Opportunity.dto';
+import { JobVerificationDto, OpportunityDto } from 'src/dto/Opportunity.dto';
 import { JwtTokenCheckInterceptor } from 'src/auth/jwt/TokenCheck/jwt-token-check.interceptor';
 import { JwtTokenBlackListInterceptor } from 'src/auth/jwt/blacklistingTokens/jwt-token-black-list.interceptor';
 import { FastifyRequest } from 'fastify';
@@ -44,7 +44,6 @@ export class MachineLearningController {
   async uploadResume(
     @Req() request: FastifyRequest,
   ): Promise<ResumeExtractResult> {
-    // Access the file from the raw request
     const rawRequest = request.raw;
     // @ts-expect-error - Fastify multipart adds this property
     const file = (await rawRequest.file()) as FastifyFile;
@@ -59,7 +58,7 @@ export class MachineLearningController {
   @UseInterceptors(JwtTokenCheckInterceptor)
   @UseInterceptors(JwtTokenBlackListInterceptor)
   @Post('jobVerify')
-  async VerifyJobs(@Body() jobDTO: OpportunityDto): Promise<JobVerifyResult> {
+  async VerifyJobs(@Body() jobDTO: JobVerificationDto): Promise<JobVerifyResult> {
     return this.mlServices.jobVerify(jobDTO) as Promise<JobVerifyResult>;
   }
 }
