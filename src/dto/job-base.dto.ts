@@ -24,25 +24,21 @@ export class JobBaseDto {
   @MaxLength(100)
   title: string;
 
-  @IsOptional()
   @IsEnum(WorkMode)
-  workMode?: WorkMode;
+  workMode: WorkMode;
 
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  skills?: string[];
+  skills: string[];
 
-  @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(50)
-  experienceNeeded?: number;
+  experienceNeeded: number;
 
-  @IsOptional()
   @IsString()
   @MaxLength(50)
-  salary?: string;
+  salary: string;
 
   @IsOptional()
   @IsString()
@@ -50,35 +46,13 @@ export class JobBaseDto {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  companyName?: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  location?: string;
-
-  @IsOptional()
-  @IsString()
-  link?: string;
-
-  @IsOptional()
-  @IsString()
-  source?: string;
+  candidatesApplied?: string[];
 }
 
 export class CreateJobDto extends JobBaseDto {
   @IsNotEmpty()
   @IsString()
-  @MinLength(2)
-  @MaxLength(100)
-  declare companyName: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(5000)
-  declare description: string;
+  declare companyId: string;
 }
 
 export class UpdateJobDto {
