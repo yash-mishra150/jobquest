@@ -15,6 +15,8 @@ import { HealthModule } from './health/health.module';
 import { ScrapperThreadService } from './Job-Services/scrapper/thread.service';
 import { CompanyLegitimacyController } from './Job-Services/company-legitimacy/company-legitimacy.controller';
 import { CompanyLegitimacyService } from './Job-Services/company-legitimacy/company-legitimacy.service';
+import { JobsService } from './Job-Services/jobs/jobs.service';
+import { JobsController } from './Job-Services/jobs/jobs.controller';
 
 @Module({
   imports: [ConfigModule.forRoot(), AuthModule, MongodbModule, HealthModule],
@@ -23,6 +25,7 @@ import { CompanyLegitimacyService } from './Job-Services/company-legitimacy/comp
     MachineLearningController,
     ScrapperController,
     CompanyLegitimacyController,
+    JobsController,
   ],
   providers: [
     AppService,
@@ -32,6 +35,7 @@ import { CompanyLegitimacyService } from './Job-Services/company-legitimacy/comp
     ScrapperThreadService,
     CompanyLegitimacyService,
     TimesjobService,
+    JobsService,
   ],
 })
 export class AppModule {
