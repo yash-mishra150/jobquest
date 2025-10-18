@@ -156,7 +156,6 @@ export class JobsService {
 
     const sanitized = jobs.map((job) => {
       const j: any = { ...job };
-      delete j._id;
       delete j.companyId;
       return j;
     });
