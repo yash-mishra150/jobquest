@@ -25,9 +25,7 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
     });
-    
-    // Add the cookies from the backend to our response headers
-    // This is crucial for authentication to work correctly
+
     if (backendCookies && backendCookies.length > 0) {
       backendCookies.forEach(cookie => {
         headers.append('Set-Cookie', cookie);
@@ -46,8 +44,6 @@ export async function POST(req: NextRequest) {
         headers: headers
       }
     );  } catch (error) {
-    console.error('Login error:', error);
-
     if (axios.isAxiosError(error)) {
       const status = error.response?.status || 500;
       const message = error.response?.data?.message || 'Login failed';

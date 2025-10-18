@@ -60,10 +60,12 @@ export default function RootLayout({
       <body className="antialiased">
         <MantineProvider theme={theme}>
           <ReduxProvider>
-            <BaseHeader />
-            <Navbar />
-            <InitialValidityCheck>{children}</InitialValidityCheck>
-            <Footer />
+            <InitialValidityCheck>
+              <BaseHeader />
+              <Navbar />
+              {children}
+              <Footer />
+            </InitialValidityCheck>
           </ReduxProvider>
         </MantineProvider>
       </body>

@@ -18,7 +18,8 @@ const Login = () => {
   const [userType, setUserType] = useState<'Candidate' | 'Employer'>('Candidate');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);  
+  const [error, setError] = useState('');
   const router = useRouter();
   const dispatch = useDispatch();
   const { userRole, isLoggedIn } = useSelector((state: RootState) => state.auth);
@@ -58,7 +59,7 @@ const Login = () => {
         // Store auth information in Redux
         dispatch(loginAction({
           userRole: response.role || userType,
-          userName: response.name, // Assuming email is used as username
+          userName: response.name,
           userType: userType
         }));
         // Redirect based on user type
@@ -66,9 +67,14 @@ const Login = () => {
       } else {
         setError(response.message || 'Login failed');
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('An unexpected error occurred during login');
+    } catch (err: any) {
+      const errorMessage = 
+        err.response?.data?.message[0] || 
+        err.response?.data?.message || 
+        err.message || 
+        'An unexpected error occurred during login';
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

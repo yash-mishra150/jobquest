@@ -106,8 +106,8 @@ const page = ({ }: pageProps) => {
                 </Button>
 
                 <Button asChild className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white">
-                  <a href="/important/Resume.pdf" target="_blank" rel="noopener noreferrer" className="w-full text-center">
-                    Download Resume
+                  <a href="/Resume.pdf" target="_blank" rel="noopener noreferrer" className="w-full text-center">
+                    View Resume
                   </a>
                 </Button>
               </div>

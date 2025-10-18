@@ -6,27 +6,27 @@ export async function POST(request: NextRequest) {
         const raw = await request.json();
 
         // Whitelist and coerce only the expected fields for the ML service
-        const body = {
+        const body: any = {
             title: String(raw?.title ?? ''),
-            link: String(raw?.link ?? ''),
-            companyName: String(raw?.companyName ?? ''),
-            location: String(raw?.location ?? ''),
-            duration: String(raw?.duration ?? ''),
-            stipend: String(raw?.stipend ?? ''),
-            earlyApplicant: Boolean(raw?.earlyApplicant ?? false),
-            skills: Array.isArray(raw?.skills) ? raw.skills.map((s: any) => String(s)) : [],
-            jobDescription: String(raw?.jobDescription ?? ''),
-            aboutCompany: String(raw?.aboutCompany ?? ''),
-            numberOfOpenings: String(raw?.numberOfOpenings ?? ''),
-            timestamp: ((): string => {
-                try {
-                    const d = new Date(raw?.timestamp ?? new Date().toISOString());
-                    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
-                } catch {
-                    return new Date().toISOString();
-                }
-            })(),
         };
+
+        // Optional fields - only include if present
+        if (raw?.company_profile) body.company_profile = String(raw.company_profile);
+        if (raw?.description) body.description = String(raw.description);
+        
+        if (raw?.requirements) {
+            if (Array.isArray(raw.requirements)) {
+                body.requirements = raw.requirements.map((r: any) => String(r));
+            } else {
+                body.requirements = String(raw.requirements);
+            }
+        }
+        
+        if (raw?.required_experience) body.required_experience = String(raw.required_experience);
+        if (raw?.required_education) body.required_education = String(raw.required_education);
+        if (raw?.benefits) body.benefits = String(raw.benefits);
+        if (raw?.salary) body.salary = String(raw.salary);
+        if (raw?.workMode) body.workMode = String(raw.workMode);
 
         const cookieHeader = request.headers.get('cookie');
 

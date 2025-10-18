@@ -14,106 +14,34 @@ import {
 import { DynamicForm } from "@/components/DynamicFormAdd";
 import type { FormFieldConfig } from "@/components/DynamicFormAdd";
 
-const jobs = [
-  {
-    logo: "/images/profile/user-1.png",
-    company: "Yata",
-    location: "Pereira",
-    title: "Nuclear Power Engineer",
-    tags: ["React"],
-    salary: "₹53k / Yearly",
-    posted: "7 days ago",
-  },
-  {
-    logo: "/logos/blognation.png",
-    company: "Blognation",
-    location: "Solna",
-    title: "Technical Writer",
-    tags: ["Trending"],
-    salary: "₹19k / Yearly",
-    posted: "12 days ago",
-  },
-  {
-    logo: "/logos/mynte.png",
-    company: "Mynte",
-    location: "Minchinābād",
-    title: "Professor",
-    tags: ["Trending"],
-    salary: "₹27k / Yearly",
-    posted: "10 days ago",
-  },
-  {
-    logo: "/logos/voonder.png",
-    company: "Voonder",
-    location: "Obrenovac",
-    title: "Financial Advisor",
-    tags: [
-      "Wordpress",
-      "Wordpress",
-      "Wordpress",
-      "Wordpress",
-      "Wordpress",
-      "Wordpress",
-      "Wordpress",
-    ],
-    salary: "₹21k / Yearly",
-    posted: "21 days ago",
-  },
-  {
-    logo: "/logos/abata.png",
-    company: "Abata",
-    location: "Thị Trấn Nho Quan",
-    title: "Associate Professor",
-    tags: ["Marketing"],
-    salary: "₹34k / Yearly",
-    posted: "12 days ago",
-  },
-  {
-    logo: "/logos/linktype.png",
-    company: "Linktype",
-    location: "Velká nad Veličkou",
-    title: "GIS Technical Architect",
-    tags: ["Marketing"],
-    salary: "₹19k / Yearly",
-    posted: "9 days ago",
-  },
-  {
-    logo: "/logos/devify.png",
-    company: "Devify",
-    location: "Palhoça",
-    title: "Electrical Engineer",
-    tags: ["Trending"],
-    salary: "₹31k / Yearly",
-    posted: "2 days ago",
-  },
-  {
-    logo: "/logos/eimbee.png",
-    company: "Eimbee",
-    location: "Neikeng",
-    title: "Assistant Media Planner",
-    tags: ["Design"],
-    salary: "₹37k / Yearly",
-    posted: "10 days ago",
-  },
-  {
-    logo: "/logos/jazzy.png",
-    company: "Jazzy",
-    location: "Glendale",
-    title: "Environmental Specialist",
-    tags: ["App"],
-    salary: "₹19k / Yearly",
-    posted: "19 days ago",
-  },
-  {
-    logo: "/logos/jamia.png",
-    company: "Jamia",
-    location: "Oka",
-    title: "Associate Professor",
-    tags: ["React"],
-    salary: "₹25k / Yearly",
-    posted: "2 days ago",
-  },
-];
+const Page = () => {
+  const [jobs, setJobs] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [editJob, setEditJob] = React.useState<any | null>(null);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    let ignore = false;
+    async function fetchJobs() {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/jobs/get");
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const result = await res.json();
+        // Expecting { success, message, data: [...] }
+        if (!ignore) {
+          setJobs(Array.isArray(result.data) ? result.data : []);
+        }
+      } catch (err) {
+        if (!ignore) setJobs([]);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    fetchJobs();
+    return () => { ignore = true; };
+  }, []);
+
 
 const jobFormConfig: FormFieldConfig[] = [
   { name: "title", label: "Job Title", type: "text", required: true },
@@ -123,13 +51,12 @@ const jobFormConfig: FormFieldConfig[] = [
     { value: "offline", label: "Offline" },
   ] },
   { name: "skills", label: "Skills", type: "tags", required: true, fullWidth: true },
-  { name: "experience", label: "Experience Needed (years)", type: "text", required: true, regex: "^\\d+$" },
+  { name: "experienceNeeded", label: "Experience Needed (years)", type: "text", required: true, regex: "^\\d+$" },
   {
     name: "salary",
     label: "Salary",
     type: "text",
     required: false,
-    regex: "^\\d+k$",
   },
   {
     name: "description",
@@ -141,16 +68,41 @@ const jobFormConfig: FormFieldConfig[] = [
   },
 ];
 
-const Page = () => {
-  const formRef = React.useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormElement>;
+const formRef = React.useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormElement>;
 
-  const handleFormSubmit = (values: { [key: string]: unknown | undefined }) => {
-    console.log("Form submitted with values:", values);
-    // Clear the form after submit
-    if (formRef.current) {
-      formRef.current.reset();
+  const handleFormSubmit = React.useCallback(async (values: { [key: string]: unknown | undefined }) => {
+    setLoading(true);
+    try {
+      let res;
+      if (editJob && editJob._id) {
+        // Update job
+        res = await fetch(`/api/jobs/update/${editJob._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        });
+      } else {
+        // Create job
+        res = await fetch("/api/jobs/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        });
+      }
+      if (!res.ok) throw new Error(editJob ? "Failed to update job" : "Failed to create job");
+      // Refresh job list
+      const jobRes = await fetch("/api/jobs/get");
+      const jobData = await jobRes.json();
+      setJobs(Array.isArray(jobData.data) ? jobData.data : []);
+      if (formRef.current) formRef.current.reset();
+      setEditJob(null);
+      setDialogOpen(false);
+    } catch (err) {
+      // Optionally show error message
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [editJob]);
 
   return (
     <div className="w-full p-10 pt-6 bg-gray-100">
@@ -199,8 +151,39 @@ const Page = () => {
               title="Create Job"
               description="Fill in the details to create a new job."
               submitButtonText="Create"
-              drawerHeight="h-[100vh]"
             />
+            {dialogOpen && editJob && (
+              <DynamicForm
+                formRef={formRef}
+                buttonTitle={"Edit a Job"}
+                hideTrigger={true}
+                open={dialogOpen}
+                onOpenChange={(o) => {
+                  if (!o) {
+                    setDialogOpen(false);
+                    setEditJob(null);
+                  }
+                }}
+                config={jobFormConfig}
+                onSubmit={async (values: any) => {
+                  await handleFormSubmit(values);
+                  setDialogOpen(false);
+                  setEditJob(null);
+                }}
+                title={"Edit a Job"}
+                description={"Edit the details of the job."}
+                submitButtonText={"Update"}
+                drawerHeight={"h-[100vh]"}
+                defaultValues={{
+                  title: editJob.title || "",
+                  workMode: editJob.workMode || "",
+                  skills: Array.isArray(editJob.skills) ? editJob.skills : [],
+                  experienceNeeded: (editJob.experienceNeeded ?? editJob.experience ?? "")?.toString?.() || "",
+                  salary: editJob.salary || "",
+                  description: editJob.description || "",
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -217,24 +200,39 @@ const Page = () => {
         }}
         className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-6"
       >
-        {jobs.map((job, idx) => (
-          <motion.div
-            key={`${job.title}-${job.company}-${idx}`}
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { y: 40, opacity: 0 },
-              visible: { y: 0, opacity: 1 },
-            }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className={idx % 2 === 0 ? "bg-[#f6f5fd]" : ""}
-          >
-            <JobCard {...job} editMode={true} />
-          </motion.div>
-        ))}
+        {loading ? (
+          <div className="col-span-2 text-center py-10 text-gray-500">Loading jobs...</div>
+        ) : jobs.length === 0 ? (
+          <div className="col-span-2 text-center py-10 text-gray-500">No jobs found.</div>
+        ) : (
+          jobs.map((job, idx) => (
+            <motion.div
+              key={`${job.title}-${job.workMode}-${idx}`}
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { y: 40, opacity: 0 },
+                visible: { y: 0, opacity: 1 },
+              }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className={idx % 2 === 0 ? "bg-[#f6f5fd]" : ""}
+            >
+              <JobCard
+                {...job}
+                tags={job.skills}
+                salary={job.salary}
+                editMode={true}
+                 OnEdit={() => {
+                   setEditJob(job);
+                   setDialogOpen(true);
+                 }}
+              />
+            </motion.div>
+          ))
+        )}
       </motion.div>
     </div>
   );
-};
+}
 
 export default Page;

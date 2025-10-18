@@ -50,6 +50,12 @@ interface DynamicFormProps {
   description: string;
   submitButtonText?: string;
   drawerHeight?: string;
+  defaultValues?: Record<string, any>;
+  // Controlled open state (optional). When provided, the dialog/drawer will be controlled by parent
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  // Hide the trigger button when using controlled mode or when you don't want a button rendered
+  hideTrigger?: boolean;
 }
 
 const useMediaQuery = (query: string) => {
@@ -75,8 +81,16 @@ export function DynamicForm({
   submitButtonText = "Submit",
   drawerHeight = "h-auto",
   formRef,
+  defaultValues = {},
+  open: controlledOpen,
+  onOpenChange,
+  hideTrigger,
 }: DynamicFormProps & { formRef?: React.RefObject<HTMLFormElement> }) {
-  const [open, setOpen] = React.useState(false);
+  // Controlled/uncontrolled open state
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = typeof controlledOpen === "boolean";
+  const open = isControlled ? (controlledOpen as boolean) : internalOpen;
+  const setOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
   const isDesktop = useMediaQuery("(min-width: 768px)");
   
   const handleClear = () => {
@@ -100,15 +114,33 @@ export function DynamicForm({
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<FormValues>({
-    defaultValues: config.reduce(
-      (acc, field) => ({
-        ...acc,
-        [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
-      }),
-      {}
-    ),
+    defaultValues: {
+      ...config.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
+        }),
+        {}
+      ),
+      ...defaultValues,
+    },
   });
+
+  // Reset form when defaultValues change (for editing)
+  React.useEffect(() => {
+    reset({
+      ...config.reduce(
+        (acc, field) => ({
+          ...acc,
+          [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
+        }),
+        {}
+      ),
+      ...defaultValues,
+    });
+  }, [JSON.stringify(defaultValues)]);
 
   const renderField = (field: FormFieldConfig) => {
     const fieldError = errors[field.name] as { message?: string } | undefined;
@@ -360,11 +392,13 @@ export function DynamicForm({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="bg-[#7367F0] text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-[#5a4fd6]">
-            {buttonTitle}
-          </Button>
-        </DialogTrigger>
+        {!hideTrigger && (
+          <DialogTrigger asChild>
+            <Button variant="outline" className="bg-[#7367F0] text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-[#5a4fd6]">
+              {buttonTitle}
+            </Button>
+          </DialogTrigger>
+        )}
         <DialogContent className="sm:max-w-[900px] p-0 bg-white border-none shadow-none">
           {TopBar}
           <div className="px-8 py-6">
@@ -377,14 +411,24 @@ export function DynamicForm({
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant="outline" className="bg-[#7367F0] text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-[#5a4fd6]">
-          {buttonTitle}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className={cn("p-0 bg-white border-none shadow-none", drawerHeight)}>
+      {!hideTrigger && (
+        <DrawerTrigger asChild>
+          <Button variant="outline" className="bg-[#7367F0] text-white font-semibold px-6 py-2 rounded-lg shadow hover:bg-[#5a4fd6]">
+            {buttonTitle}
+          </Button>
+        </DrawerTrigger>
+      )}
+      <DrawerContent className={cn("bg-white border-none shadow-none")}>
         {TopBar}
-        <div className="px-8 py-6">
+        <div
+          className="px-4 py-4 sm:px-8 sm:py-6 w-full"
+          style={{
+            maxHeight: 'calc(100vh - 80px)',
+            overflowY: 'auto',
+            minHeight: '300px',
+            boxSizing: 'border-box',
+          }}
+        >
           <FormContent />
         </div>
       </DrawerContent>

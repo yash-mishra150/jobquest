@@ -75,19 +75,23 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
       message: data.message || 'Login successful',
       role: data.role || null
     };
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.message;
+    
+    let formattedMessage;
+    if (Array.isArray(errorMessage)) {
+      formattedMessage = errorMessage[0];
+    } else {
+      formattedMessage = errorMessage || 'An error occurred during login';
+    }
+    
     return {
       success: false,
-      message: 'An error occurred during login',
+      message: formattedMessage,
     };
   }
 }
 
-/**
- * Register function that uses Next.js API route
- * Only returns minimal information (message) from the API
- */
 export async function register(userData: RegisterData): Promise<AuthResponse> {
   try {
     const response = await axios.post('/api/auth/register', userData, {
@@ -111,9 +115,20 @@ export async function register(userData: RegisterData): Promise<AuthResponse> {
     };
   } catch (error) {
     console.error('Registration error:', error);
+    
+    const errorMessage = (error as any)?.response?.data?.message;
+    
+    // Handle array of error messages - show only the first one
+    let formattedMessage;
+    if (Array.isArray(errorMessage)) {
+      formattedMessage = errorMessage[0];
+    } else {
+      formattedMessage = errorMessage || 'An error occurred during registration';
+    }
+    
     return {
       success: false,
-      message: 'An error occurred during registration',
+      message: formattedMessage,
     };
   }
 }

@@ -10,31 +10,6 @@ import { CalendarDays, MapPin, Heart, Share2, CheckCircle2, XCircle, Loader2, Sh
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
-const jobData = {
-  title: "React/ Node Js Live Project Expert",
-  link: "https://internshala.com/internship/detail/work-from-home-react-node-js-live-project-expert-internship-at-kaushal-ranjeet-private-limited1746873630",
-  companyName: "Kaushal Ranjeet Private Limited",
-  location: "Work from home",
-  duration: "3 Months",
-  stipend: "₹ 7,000 - 12,000 /month",
-  earlyApplicant: false,
-  skills: [
-    "Node.js",
-    "React",
-    "React Native",
-    "Web Application Security",
-    "Web Application Testing"
-  ],
-  jobDescription:
-    "Selected intern's day-to-day responsibilities:\n\n1. Develop and implement front-end and back-end solutions using React Native, Node.js, and React\n2. Collaborate with the team to ensure the security of web applications and conduct regular testing\n3. Troubleshoot and debug issues to optimize the performance of web applications\n4. Assist in the design and development of new features for live projects\n5. Participate in project meetings and contribute innovative ideas to improve project outcomes",
-  aboutCompany:
-    "Lelekart, under the adept guidance of Kaushal Ranjeet Private Limited, is an Indian e-commerce pioneer committed to transforming fashion retail. We blend style, quality, and affordability, offering an array of clothing that speaks to your individuality.",
-  numberOfOpenings: "1",
-  timestamp: "2025-05-10T18:15:22.441Z",
-  logo: "",
-  jobType: "Internship",
-  experience: "0-1 years"
-};
 
 const page = () => {
   const params = useParams();
@@ -42,6 +17,9 @@ const page = () => {
 
   // read selected job details from sessionStorage if present
   const [remoteJob, setRemoteJob] = React.useState<any | null>(null);
+  
+  // Track if verification has been performed to prevent multiple calls
+  const verificationPerformed = React.useRef(false);
 
   // verification state
   const [verifying, setVerifying] = React.useState(false);
@@ -54,17 +32,14 @@ const page = () => {
   // Shape expected by ML verify API
   type VerifyJobPayload = {
     title: string;
-    link: string;
-    companyName: string;
-    location: string;
-    duration: string;
-    stipend: string;
-    earlyApplicant: boolean;
-    skills: string[];
-    jobDescription: string;
-    aboutCompany: string;
-    numberOfOpenings: string;
-    timestamp: string; // ISO string
+    company_profile?: string;
+    description?: string;
+    requirements?: string | string[];
+    required_experience?: string;
+    required_education?: string;
+    benefits?: string;
+    salary?: string;
+    workMode?: string;
   };
 
   // Build a standardized payload from any job-like object
@@ -74,37 +49,58 @@ const page = () => {
       ? skillsArrRaw.map((s: any) => (typeof s === "string" ? s : String(s))).filter(Boolean)
       : [];
 
-    const tsRaw = job?.timestamp || job?.postedDate || jobData.timestamp || new Date().toISOString();
-    const ts = (() => {
-      try {
-        const d = new Date(tsRaw);
-        return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
-      } catch {
-        return new Date().toISOString();
-      }
-    })();
+    // Map experience to enum values
+    const mapExperience = (exp: string): string => {
+      const expLower = exp?.toLowerCase() || '';
+      if (expLower.includes('intern')) return 'internship';
+      if (expLower.includes('entry') || expLower.includes('0-1') || expLower.includes('0 - 1')) return 'entry level';
+      if (expLower.includes('associate')) return 'associate';
+      if (expLower.includes('mid') || expLower.includes('senior')) return 'midsenior level';
+      if (expLower.includes('director')) return 'director';
+      if (expLower.includes('executive')) return 'executive';
+      return 'applicable';
+    };
+
+    // Map education to enum values
+    const mapEducation = (edu: string): string => {
+      const eduLower = edu?.toLowerCase() || '';
+      if (eduLower.includes('high school')) return 'high school equivalent';
+      if (eduLower.includes('vocational')) return 'vocational';
+      if (eduLower.includes('certification')) return 'certification';
+      if (eduLower.includes('bachelor') || eduLower.includes('b.sc') || eduLower.includes('b.tech')) return 'bachelors degree';
+      if (eduLower.includes('master') || eduLower.includes('m.sc') || eduLower.includes('mba')) return 'masters degree';
+      if (eduLower.includes('doctorate') || eduLower.includes('phd')) return 'doctorate';
+      return 'unspecified';
+    };
 
     return {
       title: (job?.title || "").toString(),
-      link: (job?.link || "").toString(),
-      companyName: (job?.companyName || job?.company || "").toString(),
-      location: (job?.location || "").toString(),
-      duration: ("Not specified").toString(),
-      stipend: (job?.stipend || job?.salary || "Not disclosed").toString(),
-      earlyApplicant: Boolean(job?.earlyApplicant || false),
-      skills: skillsArr,
-      jobDescription: (job?.jobDescription || job?.description|| "").toString(),
-      aboutCompany: (job?.aboutCompany || job?.companyDescription || "").toString(),
-      numberOfOpenings: (job?.numberOfOpenings || "1").toString(),
-      timestamp: ts,
+      company_profile: (job?.aboutCompany || job?.companyDescription || undefined),
+      description: (job?.jobDescription || job?.description || undefined),
+      requirements: skillsArr.length > 0 ? skillsArr : undefined,
+      required_experience: job?.experience || job?.experienceRange || job?.experience_required 
+        ? mapExperience(String(job.experience || job.experienceRange || job.experience_required))
+        : undefined,
+      required_education: job?.education ? mapEducation(String(job.education)) : undefined,
+      benefits: job?.benefits || undefined,
+      salary: (job?.salary || job?.stipend || "₹3,50,000 - ₹8,00,000 /year"),
+      workMode: job?.location?.toLowerCase().includes('remote') || job?.location?.toLowerCase().includes('work from home') 
+        ? 'remote' 
+        : job?.location?.toLowerCase().includes('hybrid') 
+        ? 'hybrid' 
+        : job?.workMode || undefined,
     };
   };
 
   // helper to call our server route which proxies to the ML verifier
   const verifyJob = async (jobLike?: any) => {
-    const p = buildVerifyPayload(jobLike ?? show ?? jobData);
+    // Prevent multiple calls for the same job
+    if (verificationPerformed.current) return;
+    
+    const p = buildVerifyPayload(jobLike ?? show);
 
     try {
+      verificationPerformed.current = true;
       setVerifying(true);
       setVerified(null);
       setConfidence(null);
@@ -164,6 +160,12 @@ const page = () => {
     }
   };
 
+  // Manual re-verification function for the button
+  const reVerifyJob = async () => {
+    verificationPerformed.current = false; // Reset the flag to allow re-verification
+    await verifyJob(show);
+  };
+
   const imageVariants = {
     hidden: { scale: 0.95, opacity: 0 },
     visible: { scale: 1, opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
@@ -171,7 +173,7 @@ const page = () => {
 
   const logoSrc = "/logos/blognation.png";
 
-  const show = remoteJob || jobData;
+  const show = remoteJob;
 
   React.useEffect(() => {
     try {
@@ -187,17 +189,26 @@ const page = () => {
 
   // auto-run verification when job data becomes available
   React.useEffect(() => {
-    // `show` is derived below; only verify when we have a job object
-    // we guard by checking remoteJob or jobData presence after initial mount
-    const jobToVerify = remoteJob ?? jobData;
-    if (!jobToVerify) return;
+    // Only verify when we have remote job data from API and haven't verified yet
+    if (!remoteJob || verificationPerformed.current) return;
     // don't block UI, start verification with standardized payload
-    verifyJob(jobToVerify);
+    verifyJob(remoteJob);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remoteJob]);
 
   return (
     <div className="bg-white min-h-screen pt-24">
+      {!show ? (
+        // Loading state when no job data is available
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 md:pt-20">
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[#7367F0] mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading job details...</h2>
+            <p className="text-gray-600">Please wait while we fetch the job information.</p>
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Header Image */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex justify-center mt-5">
         <motion.div
@@ -220,11 +231,11 @@ const page = () => {
             className="absolute left-4 md:left-8 bottom-[-2.5rem]"
           >
             <div className="w-20 h-20 rounded-2xl bg-white shadow flex items-center justify-center">
-              {show.logo ? (
+              {show?.logo ? (
                 <Image src={show.logo} alt={show.companyName || show.company} width={64} height={64} className="w-full h-full object-contain rounded-2xl" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center rounded-2xl bg-[#ece9fe]">
-                  <span className="text-[#7367F0] text-2xl font-bold">{(show.companyName || show.company || 'U').charAt(0)}</span>
+                  <span className="text-[#7367F0] text-2xl font-bold">{(show?.companyName || show?.company || 'U').charAt(0)}</span>
                 </div>
               )}
             </div>
@@ -241,15 +252,15 @@ const page = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:gap-6 w-full">
             <div className="flex-1">
-              <Label className="text-[#7367F0] font-semibold text-base mb-1">{show.companyName || show.company || ''}</Label>
-              <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-900 leading-normal mb-1">{show.title || 'Job Details'}</h1>
+              <Label className="text-[#7367F0] font-semibold text-base mb-1">{show?.companyName || show?.company || ''}</Label>
+              <h1 className="text-xl md:text-2xl font-semibold tracking-wide text-gray-900 leading-normal mb-1">{show?.title || 'Job Details'}</h1>
               <div className="flex items-center gap-2 text-gray-500 text-base">
                 <MapPin size={18} />
-                {show.location}
+                {show?.location || 'Location not specified'}
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-sm mt-2">
                 <CalendarDays size={16} />
-                {new Date(show.timestamp || show.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                {new Date(show?.timestamp || show?.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
               </div>
             </div>
             <div className="flex gap-3 items-center mt-4 md:mt-0">
@@ -260,7 +271,7 @@ const page = () => {
                 <Share2 size={22} />
               </Button>
               <Button asChild className="bg-[#7367F0] text-white font-semibold px-6 py-2 rounded-xl hover:bg-[#5b4acb]">
-                <a href={show.link || jobData.link} target="_blank" rel="noopener noreferrer">Apply Now</a>
+                <a href={show?.link || "#"} target="_blank" rel="noopener noreferrer">Apply Now</a>
               </Button>
             </div>
           </div>
@@ -269,12 +280,12 @@ const page = () => {
             <div className="flex-1">
               <div className="">
                 <Label className="font-bold text-lg mb-2">Overview</Label>
-                <p className="text-gray-700 leading-relaxed mt-2">{show.aboutCompany || show.companyDescription || ''}</p>
+                <p className="text-gray-700 leading-relaxed mt-2">{show?.aboutCompany || show?.companyDescription || 'No company overview available.'}</p>
               </div>
               <div className="mt-8">
                 <Label className="font-bold text-lg mb-2">Responsibilities</Label>
                 <ul className="list-disc pl-6 text-gray-700 space-y-2 mt-2">
-                  {(show.jobDescription || show.description || '').toString().split("\n").map((line: string, idx: number) => (
+                  {(show?.jobDescription || show?.description || '').toString().split("\n").map((line: string, idx: number) => (
                     line.trim() && <li key={idx}>{line.replace(/^[0-9]+\. /, "")}</li>
                   ))}
                 </ul>
@@ -282,14 +293,14 @@ const page = () => {
               <div className="mt-8">
                 <Label className="font-bold text-lg mb-2">Skills</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {(show.skills || show.skillsList || []).map((skill: string) => (
+                  {(show?.skills || show?.skillsList || []).map((skill: string) => (
                     <Badge key={skill} className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium">{skill}</Badge>
                   ))}
                 </div>
               </div>
               <div className="mt-8">
                 <Label className="font-bold text-lg mb-2">Experience</Label>
-                <div className="text-gray-700 text-base font-semibold mt-2">{show.experience || show.experienceRange || show.experience_required || 'Not specified'}</div>
+                <div className="text-gray-700 text-base font-semibold mt-2">{show?.experience || show?.experienceRange || show?.experience_required || '1-3 years'}</div>
               </div>
             </div>
             <motion.div
@@ -360,7 +371,7 @@ const page = () => {
                     <Button
                       size="sm"
                       className="w-full"
-                      onClick={() => verifyJob(show)}
+                      onClick={reVerifyJob}
                       disabled={verifying}
                     >
                       {verifying ? "Verifying…" : "Re-verify Job"}
@@ -376,22 +387,24 @@ const page = () => {
               <div className="mb-6 border-t pt-4">
                 <Label className="font-bold text-lg mb-2">Job Details</Label>
                 <div className="flex flex-col gap-2 text-gray-700 text-base">
-                  <div><span className="font-semibold">Stipend:</span> {show.stipend || show.salary || 'Not disclosed'}</div>
-                  <div><span className="font-semibold">Employment Type:</span> {show.jobType || 'Not specified'}</div>
-                  <div><span className="font-semibold">Posted:</span> {new Date(show.timestamp || show.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
+                  <div><span className="font-semibold">Salary:</span> {show?.salary || show?.stipend || '₹3,50,000 - ₹8,00,000 /year'}</div>
+                  <div><span className="font-semibold">Employment Type:</span> {show?.jobType || 'Full-time'}</div>
+                  <div><span className="font-semibold">Posted:</span> {new Date(show?.timestamp || show?.postedDate || Date.now()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
                 </div>
               </div>
               <div>
                 <Label className="font-bold text-lg mb-2">Company Info</Label>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="font-semibold text-[#7367F0]">{show.companyName || show.company}</div>
+                  <div className="font-semibold text-[#7367F0]">{show?.companyName || show?.company}</div>
                 </div>
-                <div className="text-gray-700 text-base">{show.aboutCompany || show.companyDescription || ''}</div>
+                <div className="text-gray-700 text-base">{show?.aboutCompany || show?.companyDescription || 'No company information available.'}</div>
               </div>
             </motion.div>
           </div>
         </motion.div>
       </div>
+        </>
+      )}
     </div>
   );
 };
