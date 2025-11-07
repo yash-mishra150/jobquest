@@ -11,9 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 
-const page = () => {
+export default function Page(/* props */) {
   const params = useParams();
-  const jobName = params.JobName;
+  const _jobName = params.JobName; // assigned but unused; prefix to silence lint
 
   // read selected job details from sessionStorage if present
   const [remoteJob, setRemoteJob] = React.useState<any | null>(null);
@@ -408,5 +408,3 @@ const page = () => {
     </div>
   );
 };
-
-export default page;

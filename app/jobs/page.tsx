@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 
 const tags = ["App", "Administrative", "Android", "Wordpress", "Design", "React", "Marketing", "Trending"];
 
-const page = () => {
+export default function Page(/* props */) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const title = searchParams.get("title") || "";
@@ -20,10 +20,10 @@ const page = () => {
 
   const [search, setSearch] = React.useState<string>("");
   const [pageNum, setPageNum] = React.useState<number>(1);
-  const [size, setSize] = React.useState<number>(8);
+  const [size, _setSize] = React.useState<number>(8);
   const [jobsInput, setJobsInput] = React.useState<string>("");
   const [locationsInput, setLocationsInput] = React.useState<string>(""); 
-  const [workFromHome, setWorkFromHome] = React.useState(true);
+  const [workFromHome, _setWorkFromHome] = React.useState(true);
   const [workFromOffice, setWorkFromOffice] = React.useState(false);
   const [hybrid, setHybrid] = React.useState(true);
   const [jobAge, setJobAge] = React.useState<string>("7d");
@@ -428,5 +428,3 @@ const page = () => {
     </div>
   );
 };
-
-export default page;

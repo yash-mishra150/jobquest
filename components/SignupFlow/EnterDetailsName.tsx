@@ -6,9 +6,9 @@ import { Button } from '../ui/button';
 import { useDispatch } from 'react-redux';
 import { setField, setStep } from '@/redux/slices/signupFlowSlice';
 
-interface EnterDetailsNameProps {}
+type Props = Record<string, unknown>;
 
-const EnterDetailsName = ({}: EnterDetailsNameProps) => {
+const EnterDetailsName = ({}: Props) => {
     const dispatch = useDispatch();
 
     const [email, setEmail] = React.useState('');

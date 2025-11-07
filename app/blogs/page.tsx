@@ -1,7 +1,7 @@
 import Image from "next/image";
 import * as React from "react";
 
-interface pageProps {}
+type Props = Record<string, unknown>;
 
 const sampleBlogs = [
 	{
@@ -78,7 +78,7 @@ const sampleBlogs = [
 	},
 ];
 
-const page = ({}: pageProps) => {
+const page = ({}: Props) => {
 	return (
 		<div className="flex justify-center items-center">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 w-full">

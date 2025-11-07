@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-interface pageProps {
-}
+type Props = Record<string, unknown>;
 
-const page = ({ }: pageProps) => {
+const page = ({ }: Props) => {
   return (
    <div>
      <h1>page</h1>

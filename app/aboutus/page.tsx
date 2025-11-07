@@ -2,10 +2,10 @@ import Image from "next/image";
 import * as React from 'react';
 import { Button } from "@/components/ui/button";
 
-interface pageProps {
-}
+// Props placeholder: avoid empty-object type which ESLint flags
+type Props = Record<string, unknown>;
 
-const page = ({ }: pageProps) => {
+const page = ({ }: Props) => {
   const projects = [
     { name: "JobQuest — Careers Portal", url: "https://github.com/yash-mishra150" },
     { name: "Portfolio Site", url: "https://github.com/yash-mishra150" },

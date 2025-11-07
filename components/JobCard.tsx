@@ -1,7 +1,5 @@
 import React from "react";
-import Image from "next/image";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 
 interface JobCardProps {
   logo?: string;

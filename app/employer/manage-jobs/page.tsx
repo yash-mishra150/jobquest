@@ -97,8 +97,8 @@ const formRef = React.useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormE
       if (formRef.current) formRef.current.reset();
       setEditJob(null);
       setDialogOpen(false);
-    } catch (err) {
-      // Optionally show error message
+    } catch (_err) {
+      // intentionally ignored error — prefixed with underscore so linter won't warn
     } finally {
       setLoading(false);
     }

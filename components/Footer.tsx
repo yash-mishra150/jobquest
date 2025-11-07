@@ -8,9 +8,9 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { usePathname } from "next/navigation";
 
-interface FooterProps {}
+type Props = Record<string, unknown>;
 
-const Footer = ({}: FooterProps) => {
+const Footer = ({}: Props) => {
   const [email, setEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import BaseNavbar from '@/components/Navbars/BaseNavbar';
 import EmailVerify from '@/components/SignupFlow/EmailVerify';
 import EnterDetailsName from '@/components/SignupFlow/EnterDetailsName';
 import EnterPreferencesAdvanced from '@/components/SignupFlow/EnterPreferencesAdvance';
@@ -10,9 +9,9 @@ import Stepper from '@/components/Stepper';
 import { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
 
-interface SignUpMainProps {}
+type Props = Record<string, unknown>;
 
-const SignUpMain: React.FC<SignUpMainProps> = () => {
+const SignUpMain: React.FC<Props> = () => {
   const currentStep = useSelector((state: RootState) => state.signupFlow.currentStep);
 
   const renderStep = () => {
