@@ -33,6 +33,7 @@ const Page = () => {
           setJobs(Array.isArray(result.data) ? result.data : []);
         }
       } catch (err) {
+        console.error("Error fetching jobs:", err);
         if (!ignore) setJobs([]);
       } finally {
         if (!ignore) setLoading(false);
@@ -98,7 +99,7 @@ const formRef = React.useRef<HTMLFormElement>(null) as React.RefObject<HTMLFormE
       setEditJob(null);
       setDialogOpen(false);
     } catch (_err) {
-      // intentionally ignored error — prefixed with underscore so linter won't warn
+      console.error("Error submitting form:", _err);
     } finally {
       setLoading(false);
     }

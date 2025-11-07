@@ -15,18 +15,17 @@ interface JobCardProps {
 }
 
 const JobCard: React.FC<JobCardProps> = ({
-  logo,
+  logo: _logo, // unused - prefixed to silence lint
   company,
   location,
   title,
   tags = [],
   salary,
-  posted,
+  posted: _posted, // unused - prefixed to silence lint
   onApply,
   editMode = false,
   OnEdit,
 }) => {
-
   // generate a deterministic background color from a string
   const stringToHsl = (str: string) => {
     let hash = 0;
@@ -42,8 +41,12 @@ const JobCard: React.FC<JobCardProps> = ({
   const displaySalary = (sal?: string) => {
     if (!sal) return undefined;
     const lower = sal.toLowerCase();
-    if (lower.includes('as per industry') || lower.includes('as per company') || lower.includes('not disclosed')) {
-      return 'Not disclosed';
+    if (
+      lower.includes("as per industry") ||
+      lower.includes("as per company") ||
+      lower.includes("not disclosed")
+    ) {
+      return "Not disclosed";
     }
     return sal;
   };
@@ -51,14 +54,18 @@ const JobCard: React.FC<JobCardProps> = ({
     <div
       role="button"
       tabIndex={0}
-      onClick={(e) => {
+      onClick={() => {
         // allow onApply when user clicks the card; interactive children will stop propagation
-        onApply && onApply();
+        if (onApply) {
+          onApply();
+        }
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onApply && onApply();
+          if (onApply) {
+            onApply();
+          }
         }
       }}
       className="group bg-white rounded-2xl p-6 shadow flex flex-col justify-between h-[250px] max-w-full w-full text-left transition-colors duration-200 hover:bg-[#7367F0] focus:outline-none overflow-hidden cursor-pointer"
@@ -70,19 +77,21 @@ const JobCard: React.FC<JobCardProps> = ({
             <div
               aria-hidden
               className="w-12 h-12 flex items-center justify-center rounded-md text-white font-bold"
-              style={{ background: stringToHsl(company || 'U') }}
+              style={{ background: stringToHsl(company || "U") }}
             >
-              <span className="text-base sm:text-lg leading-none">{(company || 'U').charAt(0).toUpperCase()}</span>
+              <span className="text-base sm:text-lg leading-none">
+                {(company || "U").charAt(0).toUpperCase()}
+              </span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <div
               className="font-bold text-base sm:text-lg text-gray-900 group-hover:text-white"
               style={{
-                overflow: 'hidden',
-                display: '-webkit-box',
+                overflow: "hidden",
+                display: "-webkit-box",
                 WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
+                WebkitBoxOrient: "vertical",
               }}
               title={title}
             >
@@ -91,10 +100,10 @@ const JobCard: React.FC<JobCardProps> = ({
             <div
               className="text-xs sm:text-sm text-gray-500 group-hover:text-white mt-0.5"
               style={{
-                overflow: 'hidden',
-                display: '-webkit-box',
+                overflow: "hidden",
+                display: "-webkit-box",
                 WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
+                WebkitBoxOrient: "vertical",
               }}
               title={`${company} • ${location}`}
             >
@@ -115,7 +124,9 @@ const JobCard: React.FC<JobCardProps> = ({
             </span>
           ))}
           {tags.length > 4 && (
-            <span className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium group-hover:bg-[#a78bfa] group-hover:text-white whitespace-nowrap">more...</span>
+            <span className="bg-[#ece9fe] text-[#7367F0] px-3 py-1 rounded-full text-xs font-medium group-hover:bg-[#a78bfa] group-hover:text-white whitespace-nowrap">
+              more...
+            </span>
           )}
         </div>
         {displaySalary(salary) && (
@@ -131,11 +142,26 @@ const JobCard: React.FC<JobCardProps> = ({
               variant="default"
               onClick={(e) => {
                 e.stopPropagation();
-                OnEdit && OnEdit();
+                if (OnEdit) {
+                  OnEdit();
+                }
               }}
               className="rounded-lg h-10 w-1/2 bg-gradient-to-r from-pink-500 to-red-500 text-white flex items-center justify-center gap-2 shadow-none"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+              </svg>
               Edit
             </Button>
             <Button
@@ -143,13 +169,26 @@ const JobCard: React.FC<JobCardProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="rounded-lg h-10 w-1/2 border-[#7367F0] text-[#7367F0] flex items-center justify-center gap-2 shadow-none"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="4" />
+              </svg>
               Insights
             </Button>
           </>
         )}
       </div>
-  </div>
+    </div>
   );
 };
 
