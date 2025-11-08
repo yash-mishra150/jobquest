@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-type Props = Record<string, unknown>;
 
-const page = ({ }: Props) => {
+const page = () => {
   return (
    <div>
      <h1>page</h1>

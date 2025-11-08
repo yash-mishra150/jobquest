@@ -9,7 +9,7 @@ import Stepper from '@/components/Stepper';
 import { RootState } from '@/redux/store';
 import { useSelector } from 'react-redux';
 
-type Props = Record<string, unknown>;
+
 
 const SignUpMain: React.FC<Props> = () => {
   const currentStep = useSelector((state: RootState) => state.signupFlow.currentStep);

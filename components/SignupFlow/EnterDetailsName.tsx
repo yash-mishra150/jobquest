@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { useDispatch } from 'react-redux';
 import { setField, setStep } from '@/redux/slices/signupFlowSlice';
 
-type Props = Record<string, unknown>;
+
 
 const EnterDetailsName = ({}: Props) => {
     const dispatch = useDispatch();
