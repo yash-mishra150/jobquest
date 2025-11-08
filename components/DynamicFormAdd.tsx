@@ -72,6 +72,16 @@ const useMediaQuery = (query: string) => {
   return matches;
 };
 
+// compute initialDefaults once per config to keep useForm stable
+const computeInitialDefaults = (config: FormFieldConfig[]) =>
+  config.reduce<Record<string, unknown>>(
+    (acc, field) => ({
+      ...acc,
+      [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
+    }),
+    {}
+  );
+
 export function DynamicForm({
   config,
   onSubmit,
@@ -109,6 +119,9 @@ export function DynamicForm({
     return grouped;
   }, [config]);
 
+  const initialDefaults = React.useMemo(() => computeInitialDefaults(config), [config]);
+  const defaultValuesString = React.useMemo(() => JSON.stringify(defaultValues), [defaultValues]);
+
   const {
     register,
     handleSubmit,
@@ -117,13 +130,7 @@ export function DynamicForm({
     reset,
   } = useForm<FormValues>({
     defaultValues: {
-      ...config.reduce(
-        (acc, field) => ({
-          ...acc,
-          [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
-        }),
-        {}
-      ),
+      ...initialDefaults,
       ...defaultValues,
     },
   });
@@ -131,16 +138,10 @@ export function DynamicForm({
   // Reset form when defaultValues change (for editing)
   React.useEffect(() => {
     reset({
-      ...config.reduce(
-        (acc, field) => ({
-          ...acc,
-          [field.name]: field.type === "file" ? null : field.type === "tags" ? [] : "",
-        }),
-        {}
-      ),
+      ...initialDefaults,
       ...defaultValues,
     });
-  }, [JSON.stringify(defaultValues)]);
+  }, [defaultValuesString, initialDefaults, reset]);
 
   const renderField = (field: FormFieldConfig) => {
     const fieldError = errors[field.name] as { message?: string } | undefined;

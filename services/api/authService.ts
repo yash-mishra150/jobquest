@@ -70,10 +70,17 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
         message: data.message || 'Login failed',
       };
     }
-      return {
-      success: data.success || true,
+
+    // Normalize success/role/name to expected types (avoid null)
+    const success = typeof data.success === 'boolean' ? data.success : response.status === 200;
+    const role = typeof data.role === 'string' ? data.role : undefined;
+    const name = typeof data.name === 'string' ? data.name : undefined;
+
+    return {
+      success,
       message: data.message || 'Login successful',
-      role: data.role || null
+      role,
+      name
     };
   } catch (error: any) {
     const errorMessage = error.response?.data?.message;
