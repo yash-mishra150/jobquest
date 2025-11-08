@@ -59,7 +59,7 @@ const Login = () => {
         // Store auth information in Redux
         dispatch(loginAction({
           userRole: response.role || userType,
-          userName: response.name,
+          userName: response.name || '',
           userType: userType
         }));
         // Redirect based on user type
