@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 
 
 
-const SignUpMain: React.FC<Props> = () => {
+const SignUpMain = () => {
   const currentStep = useSelector((state: RootState) => state.signupFlow.currentStep);
 
   const renderStep = () => {

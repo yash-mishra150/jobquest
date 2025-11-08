@@ -8,7 +8,7 @@ import { setStep } from '@/redux/slices/signupFlowSlice';
 
 
 
-const EmailVerify = ({}: Props) => {
+const EmailVerify = () => {
     const dispatch = useDispatch();
 
     const [otpValue, setOtpValue] = React.useState('');

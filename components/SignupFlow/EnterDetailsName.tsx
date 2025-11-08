@@ -8,7 +8,7 @@ import { setField, setStep } from '@/redux/slices/signupFlowSlice';
 
 
 
-const EnterDetailsName = ({}: Props) => {
+const EnterDetailsName = () => {
     const dispatch = useDispatch();
 
     const [email, setEmail] = React.useState('');
