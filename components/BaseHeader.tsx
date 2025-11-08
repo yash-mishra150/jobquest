@@ -31,10 +31,8 @@ const BaseHeader = () => {
         },
     ];
 
-    // Find the matching route content
     const currentRoute = routeContent.find((item) => item.pathname === pathname);
 
-    // Return null if pathname doesn't match any allowed routes
     if (!currentRoute) {
         return null;
     }
@@ -52,7 +50,7 @@ const BaseHeader = () => {
         visible: {
             y: 0,
             opacity: 1,
-            transition: { duration: 0.6, ease: "easeOut" },
+            transition: { duration: 0.6 },
         },
     };
 
@@ -61,13 +59,13 @@ const BaseHeader = () => {
         visible: {
             scale: 1,
             opacity: 1,
-            transition: { duration: 0.8, ease: "easeOut" },
+            transition: { duration: 0.8 },
         },
     };
 
     return (
         <motion.div
-            key={pathname} // Force remount on route change to replay animations
+            key={pathname}
             className="relative min-h-[60vh] px-4 sm:px-8 lg:px-20 py-16 bg-gradient-to-br from-[#1a0034] to-[#231c2b] text-gray-900 flex items-center justify-center overflow-hidden"
             variants={containerVariants}
             initial="hidden"
