@@ -42,7 +42,7 @@ const specialTabs = [/^\/jobs\/[^/]+$/, /^\/profile$/];
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const dispatch = useDispatch();
-  const { isLoggedIn, user, userName } = useSelector((state: RootState) => state.auth);
+  const { isLoggedIn, userName } = useSelector((state: RootState) => state.auth);
   const pathname = usePathname();
   const router = useRouter();
   const isSpecialTab = specialTabs.some((regex) => regex.test(pathname));
@@ -162,10 +162,6 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="p-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={user?.avatarUrl || ""}
-                        alt="User avatar"
-                      />
                       <AvatarFallback>{userName?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                   </Button>

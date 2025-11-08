@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, ChevronDown } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -23,7 +23,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
   const [location, setLocation] = useState('');
   const router = useRouter();
 
-  const containerVariants = {
+  // typed as `any` to avoid strict Variants typing issues while keeping runtime values intact
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -31,14 +32,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onSearch }) => {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 50, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: 'easeOut' } },
+    // use bezier easing array to satisfy strict Transition typing
+    visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
   };
 
-  const imageVariants = {
+  const imageVariants: any = {
     hidden: { scale: 0.95, opacity: 0 },
-    visible: { scale: 1, opacity: 1, transition: { duration: 0.8, ease: 'easeOut' } },
+    visible: { scale: 1, opacity: 1, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
   };
 
   const handleSearch = () => {
