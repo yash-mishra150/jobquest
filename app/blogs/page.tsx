@@ -1,8 +1,6 @@
 import Image from "next/image";
 import * as React from "react";
 
-type Props = Record<string, unknown>;
-
 const sampleBlogs = [
 	{
 		id: 1,
@@ -78,7 +76,7 @@ const sampleBlogs = [
 	},
 ];
 
-const page = ({}: Props) => {
+const page = () => {
 	return (
 		<div className="flex justify-center items-center">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 w-full">
