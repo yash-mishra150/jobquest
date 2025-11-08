@@ -568,7 +568,7 @@ const Home = () => {
           </motion.div>
           <Button variant="link" className="self-start sm:self-auto px-0">
             <Link
-              href="/categories"
+              href="/jobs"
               className="flex items-center gap-2 text-[#7367F0] text-base font-semibold"
             >
               View All
